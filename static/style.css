@@ -470,24 +470,186 @@ body.lunar-mode .leap-check { opacity: 1; }
     font-weight: 900;
 }
 
-/* 신살 태그 */
-.shinsal-wrap { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-.shinsal-tag {
-    display: inline-block;
-    padding: 0.2rem 0.65rem;
-    font-size: 0.78rem;
-    font-weight: 700;
-    background: #fff8df;
-    border: 1px solid #e8c86a;
-    color: #7a5a00;
-    border-radius: 999px;
+/* ── 결과 섹션 공통 ─────────────────────────────────── */
+.result-section-wrap {
+    max-width: 1200px;
+    margin: 0 auto 1.5rem;
+    padding: 0 2rem;
 }
-/* 세운 */
-.annual-fortune-wrap { display: flex; flex-direction: column; gap: 0.4rem; }
-.annual-fortune-wrap strong { font-size: 1rem; font-weight: 800; color: var(--purple); }
-.annual-fortune-wrap .luck-ganji { font-family: 'Noto Serif KR',serif; font-size: 1.5rem; font-weight: 800; color: var(--purple); }
-.annual-fortune-wrap .luck-god { display: inline-block; font-size: 0.78rem; font-weight: 700; color: var(--purple2); background: var(--purple-pale); padding: 0.15rem 0.55rem; border-radius: 999px; }
-.annual-fortune-wrap small { font-size: 0.8rem; color: var(--text-soft); }
+.rs-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--purple);
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid var(--purple-pale);
+    margin-bottom: 1rem;
+    letter-spacing: 0.02em;
+}
+.rs-title-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.rs-title-row .rs-title { margin-bottom: 0; border-bottom: none; padding-bottom: 0; flex: 1; border-bottom: 2px solid var(--purple-pale); padding-bottom: 0.6rem; }
+
+/* ── 4컬럼 패널 ─────────────────────────────────────── */
+.result-panels.four-col { grid-template-columns: repeat(4,1fr); }
+
+/* ── 용신 박스 ─────────────────────────────────────── */
+.use-god-box {
+    margin-top: 0.75rem;
+    padding: 0.65rem 0.9rem;
+    background: var(--gold-pale);
+    border-left: 3px solid var(--gold2);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 0.88rem;
+    color: var(--ink2);
+}
+.use-god-box strong { color: var(--gold); }
+#use-god-panel .god-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 800;
+    margin: 0.2rem 0.2rem 0 0;
+}
+.god-main  { background: var(--purple); color: #fff; }
+.god-sub   { background: var(--purple-pale); color: var(--purple); border: 1px solid var(--purple2); }
+#strength-panel { font-size: 0.9rem; color: var(--ink2); }
+.strength-bar { height: 10px; background: var(--bg-alt); border-radius: 999px; overflow: hidden; margin: 0.4rem 0; }
+.strength-fill { height: 100%; border-radius: 999px; transition: width 1s ease; }
+.strength-strong .strength-fill { background: var(--purple2); }
+.strength-weak   .strength-fill { background: var(--olive); }
+
+/* ── 형충회합 그리드 ─────────────────────────────────── */
+.branch-rel-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+.rel-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.85rem 1rem;
+    font-size: 0.84rem;
+}
+.rel-card.has-data { border-color: var(--purple2); background: var(--purple-pale); }
+.rel-card h4 {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--purple2);
+    margin-bottom: 0.45rem;
+    letter-spacing: 0.04em;
+}
+.rel-card.has-data h4 { color: var(--purple); }
+.rel-none { color: var(--text-soft); font-size: 0.8rem; }
+.rel-item {
+    display: block;
+    color: var(--ink2);
+    font-weight: 600;
+    font-size: 0.84rem;
+    padding: 0.15rem 0;
+    border-bottom: 1px solid var(--border-soft);
+}
+.rel-item:last-child { border-bottom: none; }
+
+/* ── 신살 그리드 ─────────────────────────────────────── */
+.shinsal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.65rem;
+}
+.shinsal-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 0.9rem;
+}
+.shinsal-card .ss-name {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: var(--gold);
+    margin-bottom: 0.3rem;
+}
+.shinsal-card .ss-pos {
+    font-size: 0.75rem;
+    color: var(--text-soft);
+    line-height: 1.6;
+}
+/* 신살 카테고리 색상 */
+.ss-gil  { border-color: #a8d4a8; background: #f0f9f0; }
+.ss-gil .ss-name  { color: #2e7d2e; }
+.ss-hyung { border-color: #f0b0a8; background: #fef0ee; }
+.ss-hyung .ss-name { color: #b02010; }
+.ss-gun  { border-color: #c0bcd8; background: #f4f2fc; }
+.ss-gun .ss-name  { color: var(--purple2); }
+
+/* ── 세운 배지 ───────────────────────────────────────── */
+.annual-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: linear-gradient(135deg, var(--purple) 0%, #4a148c 100%);
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+}
+.annual-badge .ab-year { font-size: 0.82rem; opacity: 0.8; }
+.annual-badge .ab-ganji { font-family: 'Noto Serif KR',serif; font-size: 1.5rem; font-weight: 800; }
+.annual-badge .ab-ten  { font-size: 0.82rem; background: rgba(255,255,255,.2); padding: 0.15rem 0.55rem; border-radius: 999px; }
+.annual-badge .ab-age  { font-size: 0.8rem; opacity: 0.7; }
+
+/* ── 월운 테이블 ─────────────────────────────────────── */
+.monthly-table {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.5rem;
+    overflow-x: auto;
+}
+.month-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 0.5rem;
+    text-align: center;
+    font-size: 0.78rem;
+    position: relative;
+    transition: all 0.15s;
+    min-width: 90px;
+}
+.month-card:hover { border-color: var(--purple2); box-shadow: var(--shadow-sm); }
+.month-card.current-month {
+    border-color: var(--gold2);
+    background: var(--gold-pale);
+}
+.month-card.current-month::before {
+    content: '이달';
+    position: absolute;
+    top: -0.55rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gold2);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+.mc-month  { font-size: 0.72rem; color: var(--text-soft); margin-bottom: 0.3rem; }
+.mc-jeolgi { font-size: 0.65rem; color: var(--text-soft); margin-bottom: 0.3rem; }
+.mc-ganji  { font-family: 'Noto Serif KR',serif; font-size: 1.2rem; font-weight: 800; color: var(--purple); margin: 0.2rem 0; }
+.mc-ten    { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 0.1rem 0.4rem; border-radius: 999px; background: var(--purple-pale); color: var(--purple2); }
+.mc-enter  { font-size: 0.65rem; color: var(--text-soft); margin-top: 0.3rem; line-height: 1.4; }
+
+/* ── 대운표 스크롤 ───────────────────────────────────── */
+.luck-table-scroll { overflow-x: auto; padding-bottom: 0.5rem; }
 /* 계산 엔진 표시 */
 .calculation-note.precise { background: #e8f4e8; border-color: #4a9455; color: #1a5a1a; }
 .article-grid, .card-grid, .book-grid, .place-grid {

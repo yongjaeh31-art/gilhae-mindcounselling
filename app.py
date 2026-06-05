@@ -597,35 +597,71 @@ def fortune() -> Any:
             ],
         }
 
-        # ── 3. 계정 라이브러리 추가 정밀 분석 (신살·세운·12운성) ──────
-        try:
-            # 신살
-            shinsal_raw = analysis.get_shinsal()
-            result["shinsal"] = shinsal_raw if isinstance(shinsal_raw, list) else list(shinsal_raw) if shinsal_raw else []
-        except Exception:
-            result["shinsal"] = []
+        # ── 3. 계정 라이브러리 정밀 분석 ────────────────────────────────
+        current_year = datetime.now().year
 
+        # 신살 (dict: 신살명 → 위치 목록)
         try:
-            # 12운성 (각 기둥별)
-            twelve_stars = analysis.get_twelve_fortune_stars()
-            result["twelve_fortune_stars"] = twelve_stars if isinstance(twelve_stars, dict) else {}
+            ss = analysis.get_shinsal()
+            result["shinsal"] = ss if isinstance(ss, dict) else {}
         except Exception:
-            result["twelve_fortune_stars"] = {}
+            result["shinsal"] = {}
 
+        # 형충회합파해원진 (지지 관계)
         try:
-            # 현재 연도 세운 (세운 천간·지지와 운세)
-            current_year = datetime.now().year
-            annual = analysis.get_annual_fortune(current_year)
-            result["annual_fortune"] = annual if isinstance(annual, dict) else {}
+            br = analysis.get_branch_relations()
+            result["branch_relations"] = br if isinstance(br, dict) else {}
+        except Exception:
+            result["branch_relations"] = {}
+
+        # 12운성 (기둥별 리스트)
+        try:
+            ts = analysis.get_twelve_fortune_stars()
+            result["twelve_fortune_stars"] = ts if isinstance(ts, list) else list(ts) if ts else []
+        except Exception:
+            result["twelve_fortune_stars"] = []
+
+        # 12신 (기둥별)
+        try:
+            tg = analysis.get_twelve_gods()
+            result["twelve_gods"] = tg if isinstance(tg, list) else list(tg) if tg else []
+        except Exception:
+            result["twelve_gods"] = []
+
+        # 세운 상세 (올해 간지·십성·나이)
+        try:
+            af = analysis.get_annual_fortune(current_year)
+            result["annual_fortune"] = af if isinstance(af, dict) else {}
         except Exception:
             result["annual_fortune"] = {}
 
+        # 월운 (올해 12개월 — 절입시각 포함)
         try:
-            # 오행 비율 (계정 라이브러리 기준)
-            ratio = analysis.get_five_elements_ratio()
-            result["five_elements_ratio"] = ratio if isinstance(ratio, dict) else {}
+            mf = analysis.get_monthly_fortune(current_year)
+            result["monthly_fortune"] = mf if isinstance(mf, list) else []
+        except Exception:
+            result["monthly_fortune"] = []
+
+        # 용신·종용신 (계정 라이브러리)
+        try:
+            ug_detail = analysis.get_use_god()
+            result["use_god_detail"] = ug_detail if isinstance(ug_detail, dict) else {}
+        except Exception:
+            result["use_god_detail"] = {}
+
+        # 오행 비율 (%)
+        try:
+            fe = analysis.get_five_elements_ratio()
+            result["five_elements_ratio"] = fe if isinstance(fe, dict) else {}
         except Exception:
             result["five_elements_ratio"] = {}
+
+        # 일주 강약 지수
+        try:
+            si = analysis.get_shin_strength_index()
+            result["strength_index"] = si
+        except Exception:
+            result["strength_index"] = None
 
         return jsonify(result)
     except Exception as e:

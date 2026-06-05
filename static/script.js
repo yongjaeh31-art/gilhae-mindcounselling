@@ -215,28 +215,170 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
-    // 신살 렌더링
-    function renderShinsal(data) {
-        const el = document.getElementById('shinsal-list');
-        if (!el) return;
-        const shinsal = data.shinsal || [];
-        if (!shinsal.length) { el.innerHTML = '<span style="color:#888">-</span>'; return; }
-        el.innerHTML = shinsal.map(s =>
-            `<span class="shinsal-tag">${s}</span>`
-        ).join('');
+    // ── 용신 + 강약 렌더링 ──────────────────────────────
+    function renderUseGod(data) {
+        const el = document.getElementById('use-god-panel');
+        const box = document.getElementById('use-god-box');
+        const ug = data.use_god_detail || data.use_god || {};
+        const ugStr = typeof ug === 'string' ? ug : (ug.용신 || '-');
+        const ugSub = ug.종용신 ? ` / 희신: ${ug.종용신}` : '';
+        const reason = ug.이유 || '';
+
+        if (el) {
+            el.innerHTML = `
+                <span class="god-badge god-main">용신 ${ugStr}</span>
+                ${ug.종용신 ? `<span class="god-badge god-sub">희신 ${ug.종용신}</span>` : ''}
+                ${reason ? `<p style="font-size:.8rem;color:var(--text-soft);margin-top:.4rem">${reason}</p>` : ''}`;
+        }
+        if (box) {
+            const fe = data.five_elements_ratio || {};
+            const strong = Object.entries(fe).filter(([,v])=>v>=30).map(([k])=>k).join('·') || '-';
+            const weak   = Object.entries(fe).filter(([,v])=>v<=10).map(([k])=>k).join('·') || '-';
+            box.innerHTML = `<strong>용신 ${ugStr}${ugSub}</strong><br><span style="font-size:.8rem">강한 오행: ${strong} / 약한 오행: ${weak}</span>`;
+        }
+
+        // 강약 지수 (숫자 또는 "신강"/"신약"/"중화신약" 문자열 모두 처리)
+        const sp = document.getElementById('strength-panel');
+        if (sp) {
+            const si = data.strength_index;
+            if (si === null || si === undefined) {
+                sp.innerHTML = '<span style="color:#aaa">-</span>';
+            } else if (typeof si === 'number') {
+                const label = si >= 60 ? '신강(身强)' : si <= 40 ? '신약(身弱)' : '중화(中和)';
+                const cls   = si >= 60 ? 'strength-strong' : 'strength-weak';
+                sp.innerHTML = `
+                    <div style="font-weight:800;color:var(--purple)">${label}</div>
+                    <div class="strength-bar ${cls}">
+                        <div class="strength-fill" style="width:${Math.min(100,Math.max(0,si))}%"></div>
+                    </div>
+                    <small style="color:var(--text-soft)">${Math.round(si)}점 / 100</small>`;
+            } else {
+                // 문자열 형식 ("신강", "신약", "중화신약" 등)
+                const label = String(si);
+                const isStrong = label.includes('신강');
+                const isWeak   = label.includes('신약');
+                const pct = isStrong ? 75 : isWeak ? 30 : 50;
+                const cls = isStrong ? 'strength-strong' : 'strength-weak';
+                sp.innerHTML = `
+                    <div style="font-weight:800;color:var(--purple)">${label}</div>
+                    <div class="strength-bar ${cls}">
+                        <div class="strength-fill" style="width:${pct}%"></div>
+                    </div>`;
+            }
+        }
     }
 
-    // 세운 렌더링
+    // ── 형충회합파해원진 렌더링 ─────────────────────────
+    function renderBranchRelations(data) {
+        const grid = document.getElementById('branch-relations-grid');
+        if (!grid) return;
+        const br = data.branch_relations || {};
+        // 천간합도 추가
+        const rels = data.relations || {};
+
+        const LABELS = {
+            '육합': '육합(六合)', '충': '충(沖)', '파': '파(破)', '해': '해(害)',
+            '원진': '원진(怨嗔)', '삼합': '삼합(三合)', '방합': '방합(方合)', '형': '형(刑)',
+            '천간합': '천간합(天干合)',
+        };
+
+        const all = { ...br };
+        if (rels.천간합 && rels.천간합.length) all.천간합 = rels.천간합;
+
+        grid.innerHTML = Object.entries(LABELS).map(([key, label]) => {
+            const items = all[key] || [];
+            const hasData = items.length > 0;
+            const inner = hasData
+                ? items.map(i => `<span class="rel-item">${i}</span>`).join('')
+                : `<span class="rel-none">없음</span>`;
+            return `<div class="rel-card ${hasData ? 'has-data' : ''}"><h4>${label}</h4>${inner}</div>`;
+        }).join('');
+    }
+
+    // ── 신살 렌더링 ──────────────────────────────────────
+    const SHINSAL_TYPE = {
+        // 길신
+        '천을귀인':'gil','태극귀인':'gil','문창귀인':'gil','학당귀인':'gil','암록':'gil',
+        '금여':'gil','건록':'gil','월덕귀인':'gil','천덕귀인':'gil','복성귀인':'gil',
+        '천주귀인':'gil','관귀학관':'gil','천복귀인':'gil','협록':'gil',
+        // 흉신
+        '양인살':'hyung','홍염살':'hyung','백호살':'hyung','괴강살':'hyung',
+        '음양차착':'hyung','현침살':'hyung','고신살':'hyung','과숙살':'hyung',
+        '고란살':'hyung',
+        // 12신살
+        '겁살':'gun','재살':'gun','천살':'gun','지살':'gun','년살':'gun','월살':'gun',
+        '망신살':'gun','장성살':'gun','반안살':'gun','역마살':'gun','육해살':'gun',
+        '화개살':'gun','비인살':'gun',
+    };
+
+    function renderShinsal(data) {
+        const grid = document.getElementById('shinsal-grid');
+        if (!grid) return;
+        const ss = data.shinsal || {};
+        const entries = typeof ss === 'object' && !Array.isArray(ss)
+            ? Object.entries(ss)
+            : (Array.isArray(ss) ? ss.map(s => [s, []]) : []);
+
+        if (!entries.length) {
+            grid.innerHTML = '<p style="color:#aaa;font-size:.88rem">신살 없음</p>';
+            return;
+        }
+
+        grid.innerHTML = entries.map(([name, positions]) => {
+            const type = SHINSAL_TYPE[name] || 'gun';
+            const posStr = Array.isArray(positions) && positions.length
+                ? positions.join(', ')
+                : (typeof positions === 'string' ? positions : '');
+            return `
+                <div class="shinsal-card ss-${type}">
+                    <div class="ss-name">${name}</div>
+                    ${posStr ? `<div class="ss-pos">${posStr}</div>` : ''}
+                </div>`;
+        }).join('');
+    }
+
+    // ── 세운 + 월운 렌더링 ──────────────────────────────
     function renderAnnualFortune(data) {
-        const el = document.getElementById('annual-fortune');
-        if (!el) return;
+        // 세운 배지
+        const badge = document.getElementById('annual-fortune-badge');
         const af = data.annual_fortune || {};
-        if (!af.간지) { el.innerHTML = '-'; return; }
-        el.innerHTML = `
-            <strong>${af.년도 || ''}</strong>
-            <span class="luck-ganji">${af.간지 || ''}</span>
-            <span class="luck-god">${af.십성 || ''}</span>
-            <small>${af.나이 || ''}</small>`;
+        if (badge && af.간지) {
+            badge.innerHTML = `
+                <span class="ab-year">${af.년도 || ''}</span>
+                <span class="ab-ganji">${af.간지 || ''}</span>
+                <span class="ab-ten">${af.십성 || ''}</span>
+                <span class="ab-age">${af.나이 || ''}</span>`;
+        }
+
+        // 월운 테이블
+        const mt = document.getElementById('monthly-table');
+        if (!mt) return;
+        const mf = data.monthly_fortune || [];
+        if (!mf.length) { mt.innerHTML = '<p style="color:#aaa">월운 데이터 없음</p>'; return; }
+
+        const now = new Date();
+        const nowMonth = now.getMonth() + 1; // 1~12
+
+        // 절기 월 인덱스 → 양력 월 추정 (간단 매핑)
+        const JEOLGI_MONTH = {
+            '입춘':2,'경칩':3,'청명':4,'입하':5,'망종':6,'소서':7,
+            '입추':8,'백로':9,'한로':10,'입동':11,'대설':12,'소한':1
+        };
+
+        mt.innerHTML = mf.map((m) => {
+            const jeolgiMonth = JEOLGI_MONTH[m.절기] || 0;
+            const isCur = (jeolgiMonth === nowMonth);
+            const enterDate = m.절입시각 ? m.절입시각.split(' ')[0] : '';
+            const enterTime = m.절입시각 ? m.절입시각.split(' ')[1]?.slice(0,5) : '';
+            return `
+                <div class="month-card ${isCur ? 'current-month' : ''}">
+                    <div class="mc-month">${m.월 || ''}</div>
+                    <div class="mc-jeolgi">${m.절기 || ''}</div>
+                    <div class="mc-ganji">${m.간지 || ''}</div>
+                    <span class="mc-ten">${m.십성 || ''}</span>
+                    <div class="mc-enter">${enterDate}<br>${enterTime}</div>
+                </div>`;
+        }).join('');
     }
 
     function renderResult(data) {
@@ -258,14 +400,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         renderPillars(data);
         renderElements(data);
-        renderRelations(data);
-        renderLuck(data);
-        renderAdvice(data);
+        renderUseGod(data);
+        renderBranchRelations(data);
         renderShinsal(data);
+        renderLuck(data);
         renderAnnualFortune(data);
+        renderAdvice(data);
 
-        setText('day-master-copy', `${dayMaster.일간 || '-'}(${dayMaster.hanja || ''}) 일간입니다. ${dayMaster.description || dayMaster.특성 || ''}`);
-        setText('pattern-copy', `${data.pattern?.격 || '-'}: ${data.pattern?.특성 || ''}`);
+        const dm = data.day_master || {};
+        setText('day-master-copy',
+            `${dm.일간 || '-'}(${dm.hanja || ''}) · ${dm.음양 || ''}${dm.오행 || ''} · ${dm.특성 || dm.description || ''}`);
+        setText('pattern-copy',
+            `${data.pattern?.격 || '-'} — ${data.pattern?.특성 || ''}`);
 
         setTimeout(() => resultPage.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     }

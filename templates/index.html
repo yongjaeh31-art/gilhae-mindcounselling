@@ -166,60 +166,84 @@
         </section>
 
         <section id="saju-result-page" class="saju-result-page" hidden>
+            <!-- ① 헤더 + 메타 -->
             <div class="result-header">
                 <div>
-                    <span class="section-kicker">이미지형 만세력 결과</span>
-                    <h2 id="result-title">나의 사주 원국 보기</h2>
-                    <p id="result-subtitle">시주 · 일주 · 월주 · 년주를 카드로 정리합니다.</p>
+                    <span class="section-kicker">NASA DE441/KASI 정밀 만세력</span>
+                    <h2 id="result-title">나의 사주 원국</h2>
+                    <p id="result-subtitle">시주 · 일주 · 월주 · 년주</p>
                 </div>
                 <div class="result-actions">
-                    <button type="button" id="result-print" class="btn-tertiary">결과 인쇄</button>
-                    <a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">네이버 예약으로 상담하기</a>
+                    <button type="button" id="result-print" class="btn-tertiary">인쇄</button>
+                    <a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">네이버 예약 상담</a>
                 </div>
             </div>
             <div class="saju-board">
                 <div class="saju-meta">
                     <div><strong>입력</strong><span id="meta-input">-</span></div>
-                    <div><strong>양력 변환</strong><span id="meta-solar">-</span></div>
-                    <div><strong>음력 참고</strong><span id="meta-lunar">-</span></div>
+                    <div><strong>양력</strong><span id="meta-solar">-</span></div>
+                    <div><strong>음력</strong><span id="meta-lunar">-</span></div>
                     <div><strong>성별</strong><span id="meta-gender">-</span></div>
                     <div><strong>출생지</strong><span id="meta-place">-</span></div>
-                    <div><strong>적용 옵션</strong><span id="meta-options">-</span></div>
+                    <div><strong>옵션</strong><span id="meta-options">-</span></div>
                 </div>
-                <p id="calculation-note" class="calculation-note">무료 분석용 근사 계산입니다.</p>
+                <p id="calculation-note" class="calculation-note">NASA DE441/KASI 기반 정밀 절입시각 DB</p>
+                <!-- ② 사주 원국 (4기둥) -->
                 <div class="pillar-grid" id="pillar-grid"></div>
+                <!-- ③ 오행 분포 -->
                 <div class="element-summary">
                     <div class="element-bars" id="element-bars"></div>
                     <div class="element-copy">
                         <h3>오행 분포</h3>
-                        <p id="element-summary-text">오행 분포를 계산 중입니다.</p>
+                        <p id="element-summary-text">-</p>
+                        <div id="use-god-box" class="use-god-box"></div>
                     </div>
                 </div>
             </div>
-            <div class="result-panels">
-                <div class="result-panel"><h3>일간 설명</h3><p id="day-master-copy">-</p></div>
-                <div class="result-panel"><h3>기본 격 설명</h3><p id="pattern-copy">-</p></div>
-                <div class="result-panel"><h3>합·충·형·파·해 포인트</h3><ul id="relation-list"></ul></div>
-                <div class="result-panel"><h3>현재 대운</h3><p id="current-luck-copy">-</p></div>
-            </div>
-            <!-- 신살 + 세운 (계정 라이브러리 정밀 분석) -->
-            <div class="result-panels" style="grid-template-columns:2fr 1fr">
-                <div class="result-panel">
-                    <h3>🔮 신살 (神殺)</h3>
-                    <div id="shinsal-list" class="shinsal-wrap"></div>
-                </div>
-                <div class="result-panel">
-                    <h3>📅 올해 세운 (歲運)</h3>
-                    <div id="annual-fortune" class="annual-fortune-wrap"></div>
+
+            <!-- ④ 일간·격국·용신·강약 -->
+            <div class="result-section-wrap">
+                <div class="result-panels four-col">
+                    <div class="result-panel"><h3>일간</h3><p id="day-master-copy">-</p></div>
+                    <div class="result-panel"><h3>격국</h3><p id="pattern-copy">-</p></div>
+                    <div class="result-panel"><h3>용신</h3><div id="use-god-panel">-</div></div>
+                    <div class="result-panel"><h3>일주 강약</h3><div id="strength-panel">-</div></div>
                 </div>
             </div>
-            <div class="luck-section">
-                <h3>대운표</h3>
-                <div id="luck-table" class="luck-table"></div>
+
+            <!-- ⑤ 형충회합파해원진 -->
+            <div class="result-section-wrap">
+                <div class="rs-title">⚡ 형충회합파해원진</div>
+                <div id="branch-relations-grid" class="branch-rel-grid"></div>
             </div>
+
+            <!-- ⑥ 신살 -->
+            <div class="result-section-wrap">
+                <div class="rs-title">🔮 신살 (神殺)</div>
+                <div id="shinsal-grid" class="shinsal-grid"></div>
+            </div>
+
+            <!-- ⑦ 대운표 -->
+            <div class="result-section-wrap">
+                <div class="rs-title">🌊 대운표 (大運)</div>
+                <div class="luck-table-scroll">
+                    <div id="luck-table" class="luck-table"></div>
+                </div>
+            </div>
+
+            <!-- ⑧ 세운 + 월운 -->
+            <div class="result-section-wrap">
+                <div class="rs-title-row">
+                    <div class="rs-title">📅 세운·월운</div>
+                    <div id="annual-fortune-badge" class="annual-badge"></div>
+                </div>
+                <div id="monthly-table" class="monthly-table"></div>
+            </div>
+
+            <!-- ⑨ 분석 조언 + CTA -->
             <div class="deep-reading">
-                <h3>무료 분석 하단 안내</h3>
-                <p>무료 분석은 사주의 큰 구조를 보여줍니다. 하지만 실제 고민은 원국만으로 풀리지 않습니다. 직업, 돈, 관계, 결혼, 가족 문제는 대운·세운·현재 상황을 함께 놓고 봐야 방향이 보입니다. 길해의 상담은 사주표를 읽는 데서 끝나지 않고, 지금 선택해야 할 현실적인 방향을 함께 정리합니다.</p>
+                <h3>길해 선생님의 분석 노트</h3>
+                <p>무료 분석은 사주의 큰 구조를 보여줍니다. 직업, 돈, 관계, 결혼, 가족 문제는 대운·세운·현재 상황을 함께 놓고 봐야 방향이 보입니다. 길해의 상담은 사주표를 읽는 데서 끝나지 않고, 지금 선택해야 할 현실적인 방향을 함께 정리합니다.</p>
                 <div id="advice-list" class="advice-list"></div>
                 <div class="place-actions">
                     <a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">네이버 예약으로 상담하기</a>
