@@ -146,35 +146,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderElements(data) {
+        // 새 ID: element-bars-v2 (없으면 기존 element-bars 사용)
+        const bars = document.getElementById('element-bars') || document.getElementById('element-bars-v2');
+        if (!bars) return;
         const counts = data.element_counts || {};
         const maxValue = Math.max(1, ...Object.values(counts));
-        elementBars.innerHTML = ['목', '화', '토', '금', '수'].map((el) => {
+
+        bars.innerHTML = ['목', '화', '토', '금', '수'].map(el => {
             const count = counts[el] || 0;
-            const width = Math.max(8, Math.round((count / maxValue) * 100));
+            // 0이면 바 너비 0 (색 안 들어감), 1 이상이면 최소 12%
+            const pct = count === 0 ? 0 : Math.max(12, Math.round((count / maxValue) * 100));
             return `
                 <div class="element-line">
                     <span class="element-name">${elementLabels[el]}</span>
-                    <div class="bar-track"><div class="bar-fill el-${el}" style="width:${width}%"></div></div>
-                    <strong>${count}</strong>
-                </div>
-            `;
+                    <div class="bar-track">
+                        <div class="bar-fill el-${el}" style="width:0%" data-w="${pct}"></div>
+                    </div>
+                    <strong class="element-count">${count}</strong>
+                </div>`;
         }).join('');
 
-        const strong = (data.strong_elements || []).join(', ') || '-';
-        const weak = (data.weak_elements || []).join(', ') || '-';
+        // 애니메이션
+        setTimeout(() => {
+            bars.querySelectorAll('.bar-fill').forEach(b => {
+                b.style.width = b.dataset.w + '%';
+            });
+        }, 120);
+
+        const strong  = (data.strong_elements  || []).join(', ') || '-';
+        const weak    = (data.weak_elements    || []).join(', ') || '-';
         const missing = (data.missing_elements?.무자 || []).join(', ') || '없음';
-        setText('element-summary-text', `강한 오행은 ${strong}, 약한 오행은 ${weak}, 없는 오행은 ${missing}입니다. 이 분포는 자주 쓰는 힘과 의식적으로 보완할 힘을 보여줍니다.`);
+        setText('element-summary-text',
+            `강 ${strong} / 약 ${weak} / 없음 ${missing}`);
     }
 
     function renderRelations(data) {
-        const rel = data.relations || {};
-        const rows = [];
-        Object.entries(rel).forEach(([key, values]) => {
-            (values || []).forEach((value) => rows.push(`<li><strong>${key}</strong><span>${value}</span></li>`));
-        });
-        relationList.innerHTML = rows.length
-            ? rows.join('')
-            : '<li><strong>안정</strong><span>기본 원국에서 두드러진 합·충·형이 적게 나타납니다. 실제 상담에서는 대운·세운까지 함께 확인합니다.</span></li>';
+        // 구버전 relation-list (혹시 남아있으면 처리)
+        if (relationList) {
+            const rel = data.relations || {};
+            const rows = [];
+            Object.entries(rel).forEach(([key, values]) => {
+                (values || []).forEach(v => rows.push(`<li><strong>${key}</strong><span>${v}</span></li>`));
+            });
+            relationList.innerHTML = rows.length ? rows.join('')
+                : '<li><strong>안정</strong><span>두드러진 합·충·형이 없습니다.</span></li>';
+        }
     }
 
     function renderLuck(data) {
@@ -268,73 +284,92 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ── 형충회합파해원진 렌더링 ─────────────────────────
-    function renderBranchRelations(data) {
-        const grid = document.getElementById('branch-relations-grid');
-        if (!grid) return;
-        const br = data.branch_relations || {};
-        // 천간합도 추가
-        const rels = data.relations || {};
-
-        const LABELS = {
-            '육합': '육합(六合)', '충': '충(沖)', '파': '파(破)', '해': '해(害)',
-            '원진': '원진(怨嗔)', '삼합': '삼합(三合)', '방합': '방합(方合)', '형': '형(刑)',
-            '천간합': '천간합(天干合)',
-        };
-
-        const all = { ...br };
-        if (rels.천간합 && rels.천간합.length) all.천간합 = rels.천간합;
-
-        grid.innerHTML = Object.entries(LABELS).map(([key, label]) => {
-            const items = all[key] || [];
-            const hasData = items.length > 0;
-            const inner = hasData
-                ? items.map(i => `<span class="rel-item">${i}</span>`).join('')
-                : `<span class="rel-none">없음</span>`;
-            return `<div class="rel-card ${hasData ? 'has-data' : ''}"><h4>${label}</h4>${inner}</div>`;
-        }).join('');
-    }
-
-    // ── 신살 렌더링 ──────────────────────────────────────
-    const SHINSAL_TYPE = {
-        // 길신
-        '천을귀인':'gil','태극귀인':'gil','문창귀인':'gil','학당귀인':'gil','암록':'gil',
-        '금여':'gil','건록':'gil','월덕귀인':'gil','천덕귀인':'gil','복성귀인':'gil',
-        '천주귀인':'gil','관귀학관':'gil','천복귀인':'gil','협록':'gil',
-        // 흉신
-        '양인살':'hyung','홍염살':'hyung','백호살':'hyung','괴강살':'hyung',
-        '음양차착':'hyung','현침살':'hyung','고신살':'hyung','과숙살':'hyung',
-        '고란살':'hyung',
-        // 12신살
-        '겁살':'gun','재살':'gun','천살':'gun','지살':'gun','년살':'gun','월살':'gun',
-        '망신살':'gun','장성살':'gun','반안살':'gun','역마살':'gun','육해살':'gun',
-        '화개살':'gun','비인살':'gun',
+    // ── 형충회합 인라인 렌더링 (원국 바로 아래) ────────
+    const REL_META = {
+        '충':    { label:'충 (沖)',   cls:'chung',  short:'충' },
+        '형':    { label:'형 (刑)',   cls:'hyung',  short:'형' },
+        '파':    { label:'파 (破)',   cls:'pa',     short:'파' },
+        '해':    { label:'해 (害)',   cls:'hae',    short:'해' },
+        '원진':  { label:'원진(怨嗔)',cls:'wonjin', short:'원진' },
+        '육합':  { label:'육합(六合)',cls:'hap',    short:'육합' },
+        '삼합':  { label:'삼합(三合)',cls:'samhap', short:'삼합' },
+        '방합':  { label:'방합(方合)',cls:'banghap',short:'방합' },
+        '천간합':{ label:'천간합',   cls:'tiangan',short:'천간합'},
     };
 
+    function renderBranchRelations(data) {
+        const inline = document.getElementById('branch-relations-inline');
+        if (!inline) return;
+
+        const br   = data.branch_relations || {};
+        const rels = data.relations        || {};
+        const all  = { ...br };
+        if (rels.천간합 && rels.천간합.length) all.천간합 = rels.천간합;
+
+        const parts = [];
+        for (const [key, meta] of Object.entries(REL_META)) {
+            const items = all[key] || [];
+            if (items.length) {
+                const vals = items.map(i => {
+                    // 위치 정보 단순화: "년지-시지 미술" → "미술"
+                    const clean = i.replace(/^[^가-힣]*/,'').split('(')[0].trim();
+                    return clean || i;
+                }).join(', ');
+                parts.push(`
+                    <span class="rel-badge ${meta.cls}">
+                        <span class="rel-badge-label">${meta.label}</span>
+                        <span class="rel-badge-val">${vals}</span>
+                    </span>`);
+            } else {
+                parts.push(`<span class="rel-badge none">${meta.short}: 없음</span>`);
+            }
+        }
+
+        inline.innerHTML = parts.join('');
+    }
+
+    // ── 신살 렌더링 v2 (카테고리 분류) ─────────────────
+    const SS_TYPE = {
+        '천을귀인':'gil','태극귀인':'gil','문창귀인':'gil','학당귀인':'gil',
+        '암록':'gil','금여':'gil','건록':'gil','월덕귀인':'gil','천덕귀인':'gil',
+        '복성귀인':'gil','천주귀인':'gil','관귀학관':'gil','천복귀인':'gil','협록':'gil',
+        '양인살':'hyung','홍염살':'hyung','백호살':'hyung','괴강살':'hyung',
+        '음양차착':'hyung','현침살':'hyung','고신살':'hyung','과숙살':'hyung','고란살':'hyung',
+        '겁살':'gun','재살':'gun','천살':'gun','지살':'gun','년살':'gun','월살':'gun',
+        '망신살':'gun','장성살':'gun','반안살':'gun','역마살':'gun','육해살':'gun',
+        '화개살':'gun','비인살':'gun','천문성':'gun',
+    };
+    const SS_LABEL = { gil:'길신 (吉神)', hyung:'주의 신살', gun:'12신살' };
+
     function renderShinsal(data) {
-        const grid = document.getElementById('shinsal-grid');
+        const grid = document.getElementById('shinsal-grid') || document.getElementById('shinsal-grid');
         if (!grid) return;
         const ss = data.shinsal || {};
         const entries = typeof ss === 'object' && !Array.isArray(ss)
             ? Object.entries(ss)
-            : (Array.isArray(ss) ? ss.map(s => [s, []]) : []);
+            : Array.isArray(ss) ? ss.map(s => [s, []]) : [];
 
-        if (!entries.length) {
-            grid.innerHTML = '<p style="color:#aaa;font-size:.88rem">신살 없음</p>';
-            return;
-        }
+        if (!entries.length) { grid.innerHTML = '<p style="color:#aaa;font-size:.82rem">신살 없음</p>'; return; }
 
-        grid.innerHTML = entries.map(([name, positions]) => {
-            const type = SHINSAL_TYPE[name] || 'gun';
-            const posStr = Array.isArray(positions) && positions.length
-                ? positions.join(', ')
-                : (typeof positions === 'string' ? positions : '');
-            return `
-                <div class="shinsal-card ss-${type}">
-                    <div class="ss-name">${name}</div>
-                    ${posStr ? `<div class="ss-pos">${posStr}</div>` : ''}
-                </div>`;
-        }).join('');
+        // 카테고리별 그룹
+        const groups = { gil:[], hyung:[], gun:[] };
+        entries.forEach(([name, pos]) => {
+            const t = SS_TYPE[name] || 'gun';
+            const posStr = Array.isArray(pos) && pos.length ? pos.join(', ') : '';
+            groups[t].push({ name, posStr });
+        });
+
+        grid.innerHTML = Object.entries(groups).filter(([,arr]) => arr.length).map(([type, arr]) => `
+            <div class="ss-group">
+                <div class="ss-group-title">${SS_LABEL[type]}</div>
+                <div class="ss-tags">
+                    ${arr.map(({name, posStr}) => `
+                        <span class="ss-tag ss-${type}">
+                            ${name}
+                            ${posStr ? `<small>${posStr}</small>` : ''}
+                        </span>`).join('')}
+                </div>
+            </div>`).join('');
     }
 
     // ── 세운 + 월운 렌더링 ──────────────────────────────
@@ -365,10 +400,12 @@ document.addEventListener('DOMContentLoaded', () => {
             '입추':8,'백로':9,'한로':10,'입동':11,'대설':12,'소한':1
         };
 
-        mt.innerHTML = mf.map((m) => {
+        // monthly-table-v2 또는 monthly-table 둘 다 처리
+        const mtEl = document.getElementById('monthly-table') || mt;
+        mtEl.innerHTML = mf.map((m) => {
             const jeolgiMonth = JEOLGI_MONTH[m.절기] || 0;
             const isCur = (jeolgiMonth === nowMonth);
-            const enterDate = m.절입시각 ? m.절입시각.split(' ')[0] : '';
+            const enterDate = m.절입시각 ? m.절입시각.split(' ')[0].slice(5) : '';  // MM-DD
             const enterTime = m.절입시각 ? m.절입시각.split(' ')[1]?.slice(0,5) : '';
             return `
                 <div class="month-card ${isCur ? 'current-month' : ''}">
@@ -376,42 +413,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="mc-jeolgi">${m.절기 || ''}</div>
                     <div class="mc-ganji">${m.간지 || ''}</div>
                     <span class="mc-ten">${m.십성 || ''}</span>
-                    <div class="mc-enter">${enterDate}<br>${enterTime}</div>
+                    <div class="mc-enter">${enterDate} ${enterTime}</div>
                 </div>`;
         }).join('');
     }
 
     function renderResult(data) {
         resultPage.hidden = false;
-        const options = data.input?.options || {};
-        const optionText = Object.entries(options).map(([key, value]) => `${key}: ${value}`).join(' / ');
 
-        setText('meta-input', data.input?.label);
-        setText('meta-solar', data.converted_solar);
-        setText('meta-lunar', data.lunar_date);
+        // 메타 정보
+        setText('meta-input',  data.input?.label);
+        setText('meta-solar',  data.converted_solar);
+        setText('meta-lunar',  data.lunar_date);
         setText('meta-gender', data.input?.gender);
-        setText('meta-place', data.input?.birth_place);
-        setText('meta-options', optionText);
-        setText('calculation-note', `${data.calculation_note?.summary || ''} ${data.calculation_note?.detail || ''}${data.calculation_note?.reference_matched ? ' 기준 검증값과 일치하도록 보정되었습니다.' : ''}`);
+        setText('meta-place',  data.input?.birth_place);
 
-        const dayMaster = data.day_master || {};
-        setText('result-title', `${dayMaster.일간 || '-'}일간 · ${dayMaster.hanja || ''}의 사주 원국`);
-        setText('result-subtitle', '시주 · 일주 · 월주 · 년주를 이미지형 만세력 카드로 정리했습니다.');
+        const note = data.calculation_note || {};
+        setText('calculation-note', note.engine || note.summary || 'NASA DE441/KASI');
 
+        // 제목
+        const dm = data.day_master || {};
+        setText('result-title',    `${dm.일간 || '-'}(${dm.hanja || ''}) 일간 · 나의 사주 원국`);
+        setText('result-subtitle', '시주 · 일주 · 월주 · 년주');
+
+        // 렌더링
         renderPillars(data);
         renderElements(data);
-        renderUseGod(data);
-        renderBranchRelations(data);
+        renderBranchRelations(data);   // 원국 아래 형충회합
         renderShinsal(data);
+        renderUseGod(data);
         renderLuck(data);
         renderAnnualFortune(data);
         renderAdvice(data);
 
-        const dm = data.day_master || {};
+        // 일간·격국
         setText('day-master-copy',
-            `${dm.일간 || '-'}(${dm.hanja || ''}) · ${dm.음양 || ''}${dm.오행 || ''} · ${dm.특성 || dm.description || ''}`);
+            `${dm.일간 || '-'}(${dm.hanja || ''}) · ${dm.음양 || ''}${dm.오행 || ''}\n${dm.특성 || dm.description || ''}`);
         setText('pattern-copy',
-            `${data.pattern?.격 || '-'} — ${data.pattern?.특성 || ''}`);
+            `${data.pattern?.격 || '-'}\n${data.pattern?.특성 || ''}`);
 
         setTimeout(() => resultPage.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     }

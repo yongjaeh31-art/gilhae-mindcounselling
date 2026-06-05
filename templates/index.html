@@ -166,78 +166,82 @@
         </section>
 
         <section id="saju-result-page" class="saju-result-page" hidden>
-            <!-- ① 헤더 + 메타 -->
-            <div class="result-header">
-                <div>
-                    <span class="section-kicker">NASA DE441/KASI 정밀 만세력</span>
+
+            <!-- ① 결과 헤더 -->
+            <div class="res-header">
+                <div class="res-header-left">
+                    <div class="res-engine-badge">NASA DE441/KASI</div>
                     <h2 id="result-title">나의 사주 원국</h2>
                     <p id="result-subtitle">시주 · 일주 · 월주 · 년주</p>
                 </div>
-                <div class="result-actions">
+                <div class="res-header-right">
                     <button type="button" id="result-print" class="btn-tertiary">인쇄</button>
-                    <a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">네이버 예약 상담</a>
+                    <a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">상담 예약</a>
                 </div>
             </div>
-            <div class="saju-board">
-                <div class="saju-meta">
-                    <div><strong>입력</strong><span id="meta-input">-</span></div>
-                    <div><strong>양력</strong><span id="meta-solar">-</span></div>
-                    <div><strong>음력</strong><span id="meta-lunar">-</span></div>
-                    <div><strong>성별</strong><span id="meta-gender">-</span></div>
-                    <div><strong>출생지</strong><span id="meta-place">-</span></div>
-                    <div><strong>옵션</strong><span id="meta-options">-</span></div>
-                </div>
-                <p id="calculation-note" class="calculation-note">NASA DE441/KASI 기반 정밀 절입시각 DB</p>
-                <!-- ② 사주 원국 (4기둥) -->
+
+            <!-- ② 입력 정보 바 -->
+            <div class="res-meta-bar">
+                <span><em>입력</em><b id="meta-input">-</b></span>
+                <span><em>양력</em><b id="meta-solar">-</b></span>
+                <span><em>음력</em><b id="meta-lunar">-</b></span>
+                <span><em>성별</em><b id="meta-gender">-</b></span>
+                <span><em>출생지</em><b id="meta-place">-</b></span>
+                <span id="calculation-note" class="res-engine-note">-</span>
+            </div>
+
+            <!-- ③ 사주 원국 (4기둥) -->
+            <div class="res-block">
+                <div class="res-block-title">사주 원국</div>
                 <div class="pillar-grid" id="pillar-grid"></div>
-                <!-- ③ 오행 분포 -->
-                <div class="element-summary">
-                    <div class="element-bars" id="element-bars"></div>
-                    <div class="element-copy">
-                        <h3>오행 분포</h3>
-                        <p id="element-summary-text">-</p>
-                        <div id="use-god-box" class="use-god-box"></div>
+
+                <!-- ④ 형충회합 — 원국 바로 아래 -->
+                <div class="rel-inline-wrap">
+                    <div class="rel-inline-title">형충회합파해원진</div>
+                    <div id="branch-relations-inline" class="rel-inline-grid"></div>
+                </div>
+            </div>
+
+            <!-- ⑤ 오행 분포 + 신살 (나란히) -->
+            <div class="res-two-col">
+                <!-- 오행 분포 -->
+                <div class="res-block">
+                    <div class="res-block-title">오행 분포 (五行)</div>
+                    <div class="element-bars-wrap">
+                        <div id="element-bars" class="element-bars-v2"></div>
                     </div>
+                    <p id="element-summary-text" class="el-summary-text">-</p>
+                </div>
+                <!-- 신살 -->
+                <div class="res-block">
+                    <div class="res-block-title">신살 (神殺)</div>
+                    <div id="shinsal-grid" class="shinsal-grid-v2"></div>
                 </div>
             </div>
 
-            <!-- ④ 일간·격국·용신·강약 -->
-            <div class="result-section-wrap">
-                <div class="result-panels four-col">
-                    <div class="result-panel"><h3>일간</h3><p id="day-master-copy">-</p></div>
-                    <div class="result-panel"><h3>격국</h3><p id="pattern-copy">-</p></div>
-                    <div class="result-panel"><h3>용신</h3><div id="use-god-panel">-</div></div>
-                    <div class="result-panel"><h3>일주 강약</h3><div id="strength-panel">-</div></div>
-                </div>
-            </div>
-
-            <!-- ⑤ 형충회합파해원진 -->
-            <div class="result-section-wrap">
-                <div class="rs-title">⚡ 형충회합파해원진</div>
-                <div id="branch-relations-grid" class="branch-rel-grid"></div>
-            </div>
-
-            <!-- ⑥ 신살 -->
-            <div class="result-section-wrap">
-                <div class="rs-title">🔮 신살 (神殺)</div>
-                <div id="shinsal-grid" class="shinsal-grid"></div>
+            <!-- ⑥ 일간·격국·용신·강약 -->
+            <div class="res-four-col">
+                <div class="res-card"><div class="res-card-title">일간</div><div id="day-master-copy" class="res-card-body">-</div></div>
+                <div class="res-card"><div class="res-card-title">격국</div><div id="pattern-copy" class="res-card-body">-</div></div>
+                <div class="res-card"><div class="res-card-title">용신</div><div id="use-god-panel" class="res-card-body">-</div></div>
+                <div class="res-card"><div class="res-card-title">일주 강약</div><div id="strength-panel" class="res-card-body">-</div></div>
             </div>
 
             <!-- ⑦ 대운표 -->
-            <div class="result-section-wrap">
-                <div class="rs-title">🌊 대운표 (大運)</div>
+            <div class="res-block">
+                <div class="res-block-title">대운표 (大運)</div>
                 <div class="luck-table-scroll">
                     <div id="luck-table" class="luck-table"></div>
                 </div>
             </div>
 
             <!-- ⑧ 세운 + 월운 -->
-            <div class="result-section-wrap">
-                <div class="rs-title-row">
-                    <div class="rs-title">📅 세운·월운</div>
+            <div class="res-block">
+                <div class="res-block-title-row">
+                    <span class="res-block-title">세운 · 월운</span>
                     <div id="annual-fortune-badge" class="annual-badge"></div>
                 </div>
-                <div id="monthly-table" class="monthly-table"></div>
+                <div id="monthly-table" class="monthly-table-v2"></div>
             </div>
 
             <!-- ⑨ 분석 조언 + CTA -->
