@@ -151,7 +151,26 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        const C = (content, cls='') => `<div class="mt-cell ${cls}">${content}</div>`;
+        // 셀 기본 인라인 스타일 (CSS 클래스 미적용 방어)
+        const CELL_BASE = 'background:#fff;padding:.45rem .4rem;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.08rem;font-size:.82rem;min-height:2rem;';
+        const HEAD_STYLE = 'background:#42245c;color:#fff;padding:.6rem .4rem;font-weight:900;';
+        const HEAD_DAY_STYLE = 'background:#5a2890;color:#fff;padding:.6rem .4rem;font-weight:900;';
+        const GOD_STYLE = 'background:#f5f0fa;min-height:1.9rem;';
+        const JIJANG_STYLE = 'flex-direction:row;gap:.3rem;background:#fbf6ea;font-size:.76rem;min-height:1.75rem;padding:.3rem .35rem;';
+        const TWELVE_STYLE = 'background:#fffaf0;min-height:1.9rem;font-weight:700;color:#42245c;';
+        const REL_STYLE = 'background:#f5f0fa;flex-direction:row;flex-wrap:wrap;gap:.2rem;padding:.3rem .25rem;min-height:1.75rem;';
+        const TILE_CELL_STYLE = 'background:#faf8ff;padding:.3rem;';
+
+        const C = (content, cls='') => {
+            let extra = CELL_BASE;
+            if (cls.includes('mt-head')) extra = cls.includes('is-day') ? HEAD_DAY_STYLE : HEAD_STYLE;
+            else if (cls.includes('mt-god')) extra = GOD_STYLE;
+            else if (cls.includes('mt-jijang')) extra = JIJANG_STYLE;
+            else if (cls.includes('mt-twelve')) extra = TWELVE_STYLE;
+            else if (cls.includes('mt-rel')) extra = REL_STYLE;
+            else if (cls.includes('mt-stem-cell') || cls.includes('mt-branch-cell')) extra = CELL_BASE + TILE_CELL_STYLE;
+            return `<div class="mt-cell ${cls}" style="${extra}">${content}</div>`;
+        };
 
         let rows = '';
 
@@ -169,20 +188,30 @@ document.addEventListener('DOMContentLoaded', () => {
             return C(`${hap}<span class="mt-god ${gc(p.stem_ten_god)}">${god}</span>`, 'mt-god-top');
         }).join('');
 
+        // 오행 타일 색상 (인라인)
+        const EL_BG = {목:'linear-gradient(145deg,#6aad72,#4a8a52)',화:'linear-gradient(145deg,#e05848,#b82820)',
+                       토:'linear-gradient(145deg,#ddb840,#b89020)',금:'linear-gradient(145deg,#d0d0e0,#a8a8c0)',
+                       수:'linear-gradient(145deg,#3a5898,#223068)'};
+        const tileEl = (ch, el, isDay) => {
+            const bg = EL_BG[el] || '#888';
+            const isGold = el === '금';
+            const hanjaCss = isGold ? 'color:#2a2050;text-shadow:none;' : 'color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.35);';
+            const koCss = isGold ? 'color:rgba(42,32,80,.75);' : 'color:rgba(255,255,255,.88);';
+            const border = isDay ? '2px solid rgba(255,255,255,.5)' : '2px solid rgba(0,0,0,.18)';
+            return `<div style="background:${bg};width:100%;max-width:80px;aspect-ratio:1/1;border-radius:.35rem;display:flex;flex-direction:column;align-items:center;justify-content:center;border:${border}">
+                <span style="font-family:'Noto Serif KR',serif;font-size:clamp(1.6rem,3.5vw,2.2rem);font-weight:900;line-height:1;${hanjaCss}">${ch.hanja}</span>
+                <span style="font-size:.62rem;font-weight:700;margin-top:.1rem;${koCss}">${ch.ko}·${ch.element}${ch.yin_yang}</span>
+            </div>`;
+        };
+
         // ── Row 2: 천간 타일 ───
         rows += pillars.map(p =>
-            C(`<div class="mt-tile el-${p.stem.element} ${p.key==='day'?'is-day-tile':''}">
-                   <span class="mt-hanja">${p.stem.hanja}</span>
-                   <span class="mt-ko">${p.stem.ko}·${p.stem.element}${p.stem.yin_yang}</span>
-               </div>`, 'mt-stem-cell')
+            C(tileEl(p.stem, p.stem.element, p.key==='day'), 'mt-stem-cell')
         ).join('');
 
         // ── Row 3: 지지 타일 ───
         rows += pillars.map(p =>
-            C(`<div class="mt-tile el-${p.branch.element} ${p.key==='day'?'is-day-tile':''}">
-                   <span class="mt-hanja">${p.branch.hanja}</span>
-                   <span class="mt-ko">${p.branch.ko}·${p.branch.element}${p.branch.yin_yang}</span>
-               </div>`, 'mt-branch-cell')
+            C(tileEl(p.branch, p.branch.element, p.key==='day'), 'mt-branch-cell')
         ).join('');
 
         // ── Row 4: 지지 십성 ───
@@ -219,7 +248,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return C(badges || '<span class="rel-none">-</span>', 'mt-rel');
         }).join('');
 
-        pillarGrid.innerHTML = `<div class="manse-table">${rows}</div>`;
+        // 인라인 스타일로 그리드 강제 적용 (CSS 로딩 이슈 방지)
+        const MANSE_STYLE = [
+            'display:grid',
+            'grid-template-columns:repeat(4,1fr)',
+            'gap:1px',
+            'background:#c8b89a',
+            'border:2px solid #42245c',
+            'border-radius:.5rem',
+            'overflow:hidden',
+            'width:100%',
+        ].join(';');
+        pillarGrid.style.display = 'block';
+        pillarGrid.innerHTML = `<div class="manse-table" style="${MANSE_STYLE}">${rows}</div>`;
     }
 
     // ── 대운 렌더링 (만세력 타일 스타일) ────────────────
