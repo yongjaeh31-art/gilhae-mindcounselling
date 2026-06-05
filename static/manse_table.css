@@ -1,0 +1,88 @@
+/* ══ 만세력 테이블 ══ */
+#pillar-grid { margin-bottom: .85rem; }
+.manse-table {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 2px solid var(--purple);
+    border-radius: .5rem;
+    overflow: hidden;
+    background: var(--line);
+    gap: 1px;
+}
+.mt-cell {
+    background: #fff;
+    padding: .45rem .4rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: .08rem;
+    font-size: .8rem;
+    min-height: 2rem;
+}
+.mt-head { background: var(--purple) !important; color: #fff; padding: .55rem .4rem; gap: .18rem; }
+.mt-head.is-day { background: #5a2890 !important; }
+.mt-lbl { font-size: .82rem; font-weight: 900; display: flex; align-items: center; gap: .3rem; }
+.day-em { font-style:normal; font-size:.7rem; background:rgba(255,255,255,.25); padding:.05rem .38rem; border-radius:999px; }
+.mt-ganji { font-size:.72rem; opacity:.75; font-weight:700; }
+.mt-god-top, .mt-god-bot { background:#f5f0fa !important; min-height:1.9rem; }
+.mt-god { font-size:.82rem; font-weight:900; padding:.08rem .45rem; border-radius:.22rem; }
+.hap-dot { font-size:.65rem; font-weight:900; color:var(--gold); background:rgba(185,139,49,.12); padding:.05rem .32rem; border-radius:999px; margin-bottom:.08rem; display:block; }
+.mt-stem-cell   { padding:.3rem .3rem .15rem; background:#faf8ff !important; }
+.mt-branch-cell { padding:.15rem .3rem .3rem; background:#faf8ff !important; }
+.mt-tile { width:100%; max-width:78px; aspect-ratio:1/1; border-radius:.35rem; display:flex; flex-direction:column; align-items:center; justify-content:center; border:2px solid rgba(0,0,0,.18); transition:transform .15s,box-shadow .15s; }
+.mt-tile:hover { transform:scale(1.05); box-shadow:0 4px 14px rgba(0,0,0,.22); }
+.mt-tile.is-day-tile { border-color:rgba(255,255,255,.5); box-shadow:0 2px 8px rgba(0,0,0,.25); }
+.mt-hanja { font-size:clamp(1.6rem,4vw,2.4rem); font-weight:900; line-height:1; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.35); font-family:'Noto Serif KR',serif; }
+.mt-ko { font-size:.63rem; font-weight:700; color:rgba(255,255,255,.88); margin-top:.12rem; }
+.el-금.mt-tile .mt-hanja, .mt-tile.el-금 .mt-hanja { color:#2a2050; text-shadow:none; }
+.el-금.mt-tile .mt-ko,    .mt-tile.el-금 .mt-ko    { color:rgba(42,32,80,.75); }
+.mt-jijang { flex-direction:row !important; gap:.25rem !important; padding:.3rem .35rem; background:var(--cream) !important; font-size:.76rem; min-height:1.75rem; }
+.mt-jijang.mt-empty { background:var(--cream) !important; }
+.jj-hanja { font-family:'Noto Serif KR',serif; font-size:.88rem; font-weight:900; padding:.05rem .22rem; border-radius:.2rem; }
+.jj-hanja.el-목 { background:rgba(95,168,107,.18); color:#2a6e34; }
+.jj-hanja.el-화 { background:rgba(217,75,61,.15); color:#9a1808; }
+.jj-hanja.el-토 { background:rgba(230,191,69,.2); color:#7a5a00; }
+.jj-hanja.el-금 { background:rgba(168,170,192,.2); color:#404060; }
+.jj-hanja.el-수 { background:rgba(34,43,58,.12); color:#1a2840; }
+.jj-ko { color:var(--muted); font-size:.72rem; }
+.jj-god { font-weight:700; font-size:.73rem; }
+.mt-twelve { background:var(--paper) !important; min-height:1.9rem; }
+.mt-twelve-val { font-size:.8rem; font-weight:700; color:var(--purple); }
+.mt-rel { background:#faf8ff !important; flex-direction:row !important; flex-wrap:wrap; gap:.18rem !important; padding:.3rem .25rem; min-height:1.75rem; }
+.rel-none { color:var(--muted); font-size:.72rem; }
+.rel-chip { font-size:.68rem; font-weight:800; padding:.08rem .32rem; border-radius:999px; border:1px solid; }
+.rc-chung  { background:#fde8e6; border-color:#e08880; color:#900808; }
+.rc-hyung  { background:#fff0e0; border-color:#e0aa60; color:#804000; }
+.rc-pa     { background:#f0e8f8; border-color:#b090d0; color:#501880; }
+.rc-hae    { background:#e0eef8; border-color:#7aaac8; color:#184878; }
+.rc-wonjin { background:#f8f0e0; border-color:#c8aa60; color:#604800; }
+.rc-hap    { background:#e8f4e8; border-color:#7aaa7a; color:#185818; }
+/* 십성 색상 */
+.gc-bk   { color:#42245c; background:rgba(66,36,92,.1);   }
+.gc-sh   { color:#8a5800; background:rgba(185,139,49,.12); }
+.gc-jae  { color:#1a5a20; background:rgba(86,104,63,.1);   }
+.gc-gwan { color:#8a1810; background:rgba(180,40,30,.1);   }
+.gc-in   { color:#183878; background:rgba(30,60,130,.1);   }
+/* 오행 타일 */
+.el-목 { background:linear-gradient(145deg,#6aad72,#4a8a52); }
+.el-화 { background:linear-gradient(145deg,#e05848,#b82820); }
+.el-토 { background:linear-gradient(145deg,#ddb840,#b89020); }
+.el-금 { background:linear-gradient(145deg,#cccce0,#a8a8c0); }
+.el-수 { background:linear-gradient(145deg,#3a5898,#223068); }
+/* 대운 */
+.luck-table { display:grid; grid-template-columns:repeat(10,minmax(85px,1fr)); gap:.5rem; min-width:600px; }
+.dk-card { background:#fff; border:1.5px solid var(--line); border-radius:.4rem; padding:.55rem .4rem; text-align:center; display:flex; flex-direction:column; gap:.2rem; position:relative; transition:box-shadow .15s,transform .15s; }
+.dk-card:hover { box-shadow:0 4px 14px rgba(66,36,92,.15); transform:translateY(-1px); }
+.dk-current { border-color:var(--gold) !important; border-width:2px; background:linear-gradient(180deg,#fffbe8,#fff 60%); }
+.dk-current::before { content:'현재'; position:absolute; top:-.55rem; left:50%; transform:translateX(-50%); background:var(--gold); color:#fff; font-size:.62rem; font-weight:900; padding:.08rem .42rem; border-radius:999px; white-space:nowrap; }
+.dk-age   { font-size:.72rem; color:var(--muted); font-weight:700; }
+.dk-god   { font-size:.76rem; font-weight:900; }
+.dk-tile  { width:100%; aspect-ratio:1/1; max-width:56px; margin:0 auto; border-radius:.25rem; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1.5px solid rgba(0,0,0,.2); }
+.dk-tile span  { font-family:'Noto Serif KR',serif; font-size:1.15rem; font-weight:900; color:#fff; line-height:1; text-shadow:0 1px 3px rgba(0,0,0,.3); }
+.dk-tile small { font-size:.6rem; color:rgba(255,255,255,.85); font-weight:700; }
+.dk-tile.el-금 span  { color:#2a2050; text-shadow:none; }
+.dk-tile.el-금 small { color:rgba(42,32,80,.7); }
+.dk-twelve { font-size:.7rem; font-weight:700; color:var(--purple); }
+.dk-dir    { font-size:.65rem; color:var(--muted); }

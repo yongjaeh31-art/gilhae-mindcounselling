@@ -113,37 +113,163 @@ document.addEventListener('DOMContentLoaded', () => {
         if (el) el.textContent = value || '-';
     }
 
-    function makeCharTile(charObj, extraClass = '') {
-        return `
-            <div class="char-tile ${charObj.css || ''} ${extraClass}">
-                <span class="hanja">${charObj.hanja}</span>
-                <span class="ko">${charObj.ko} · ${charObj.element}${charObj.yin_yang}</span>
-            </div>
-        `;
-    }
+    // ── 십성 → 색상 클래스 ──────────────────────────────
+    const GOD_CLS = {
+        '비견':'gc-bk','겁재':'gc-bk',
+        '식신':'gc-sh','상관':'gc-sh',
+        '편재':'gc-jae','정재':'gc-jae',
+        '편관':'gc-gwan','정관':'gc-gwan',
+        '편인':'gc-in','정인':'gc-in',
+    };
+    const gc = g => GOD_CLS[g] || '';
 
+    // ── 만세력 테이블 형태 기둥 렌더링 ──────────────────
     function renderPillars(data) {
-        pillarGrid.innerHTML = (data.visual_pillars || []).map((pillar) => {
-            const hidden = pillar.hidden_stems?.length
-                ? pillar.hidden_stems.map((h) => `<span class="hidden-stem ${h.css}">${h.hanja} ${h.ko}<small>${h.ten_god}</small></span>`).join('')
-                : '<span class="hidden-stem empty">-</span>';
+        if (!pillarGrid) return;
+        const pillars  = data.visual_pillars || [];  // [시주, 일주, 월주, 년주]
+        const rels     = data.relations        || {};
+        const brRels   = data.branch_relations || {};
 
-            return `
-                <article class="pillar-card ${pillar.key === 'day' ? 'day-pillar' : ''}">
-                    <div class="pillar-head">
-                        <strong>${pillar.label}</strong>
-                        <span>${pillar.role}</span>
-                    </div>
-                    <div class="ten-god top">${pillar.stem_ten_god || '-'}</div>
-                    ${makeCharTile(pillar.stem, 'stem-tile')}
-                    ${makeCharTile(pillar.branch, 'branch-tile')}
-                    <div class="ten-god bottom">${pillar.branch_ten_god || '-'}</div>
-                    <div class="pillar-detail"><span>지장간</span><div>${hidden}</div></div>
-                    <div class="pillar-detail"><span>12운성</span><strong>${pillar.twelve_stage || '-'}</strong></div>
-                </article>
-            `;
+        // 어느 기둥에 천간합이 있는지
+        const LABEL_KEY = {'시주':'hour','일주':'day','월주':'month','년주':'year'};
+        const tianHapKeys = new Set();
+        (rels.천간합 || []).forEach(h => {
+            Object.keys(LABEL_KEY).forEach(l => { if (h.includes(l)) tianHapKeys.add(LABEL_KEY[l]); });
+        });
+
+        // 어느 기둥에 형충파해원진이 있는지 (아이콘 표시용)
+        const relKeys = {}; // key → [종류들]
+        ['충','형','파','해','원진','육합','삼합','방합'].forEach(type => {
+            (brRels[type] || []).forEach(h => {
+                Object.keys(LABEL_KEY).forEach(l => {
+                    if (h.includes(l)) {
+                        const k = LABEL_KEY[l];
+                        relKeys[k] = relKeys[k] || [];
+                        if (!relKeys[k].includes(type)) relKeys[k].push(type);
+                    }
+                });
+            });
+        });
+
+        const C = (content, cls='') => `<div class="mt-cell ${cls}">${content}</div>`;
+
+        let rows = '';
+
+        // ── Row 0: 헤더 (라벨 + 간지) ───
+        rows += pillars.map(p =>
+            C(`<span class="mt-lbl">${p.label}${p.key==='day'?' <em class="day-em">나</em>':''}</span>
+               <span class="mt-ganji">${p.stem.ko}${p.branch.ko}</span>`,
+              `mt-head ${p.key==='day'?'is-day':''}`)
+        ).join('');
+
+        // ── Row 1: 천간합 + 천간 십성 ───
+        rows += pillars.map(p => {
+            const god = p.key === 'day' ? '일간' : (p.stem_ten_god || '—');
+            const hap = tianHapKeys.has(p.key) ? '<span class="hap-dot">합</span>' : '';
+            return C(`${hap}<span class="mt-god ${gc(p.stem_ten_god)}">${god}</span>`, 'mt-god-top');
         }).join('');
+
+        // ── Row 2: 천간 타일 ───
+        rows += pillars.map(p =>
+            C(`<div class="mt-tile el-${p.stem.element} ${p.key==='day'?'is-day-tile':''}">
+                   <span class="mt-hanja">${p.stem.hanja}</span>
+                   <span class="mt-ko">${p.stem.ko}·${p.stem.element}${p.stem.yin_yang}</span>
+               </div>`, 'mt-stem-cell')
+        ).join('');
+
+        // ── Row 3: 지지 타일 ───
+        rows += pillars.map(p =>
+            C(`<div class="mt-tile el-${p.branch.element} ${p.key==='day'?'is-day-tile':''}">
+                   <span class="mt-hanja">${p.branch.hanja}</span>
+                   <span class="mt-ko">${p.branch.ko}·${p.branch.element}${p.branch.yin_yang}</span>
+               </div>`, 'mt-branch-cell')
+        ).join('');
+
+        // ── Row 4: 지지 십성 ───
+        rows += pillars.map(p =>
+            C(`<span class="mt-god ${gc(p.branch_ten_god)}">${p.branch_ten_god || '—'}</span>`, 'mt-god-bot')
+        ).join('');
+
+        // ── Row 5-7: 지장간 (최대 3행) ───
+        for (let i = 0; i < 3; i++) {
+            rows += pillars.map(p => {
+                const hs = p.hidden_stems || [];
+                const s  = hs[i];
+                return s
+                    ? C(`<span class="jj-hanja el-${s.element}">${s.hanja}</span>
+                         <span class="jj-ko">${s.ko}</span>
+                         <span class="jj-god ${gc(s.ten_god)}">${s.ten_god||'-'}</span>`, 'mt-jijang')
+                    : C('', 'mt-jijang mt-empty');
+            }).join('');
+        }
+
+        // ── Row 8: 12운성 ───
+        rows += pillars.map(p =>
+            C(`<span class="mt-twelve-val">${p.twelve_stage||'-'}</span>`, 'mt-twelve')
+        ).join('');
+
+        // ── Row 9: 형충회합 인디케이터 ───
+        rows += pillars.map(p => {
+            const types = relKeys[p.key] || [];
+            const badges = types.map(t => {
+                const cls = {충:'rc-chung',형:'rc-hyung',파:'rc-pa',해:'rc-hae',
+                             원진:'rc-wonjin',육합:'rc-hap',삼합:'rc-hap',방합:'rc-hap'}[t]||'';
+                return `<span class="rel-chip ${cls}">${t}</span>`;
+            }).join('');
+            return C(badges || '<span class="rel-none">-</span>', 'mt-rel');
+        }).join('');
+
+        pillarGrid.innerHTML = `<div class="manse-table">${rows}</div>`;
     }
+
+    // ── 대운 렌더링 (만세력 타일 스타일) ────────────────
+    function renderLuck(data) {
+        if (!luckTable) return;
+        const luck = data.luck_cycle || [];
+
+        let birthYear = null;
+        try { birthYear = parseInt((data.converted_solar||'').split('-')[0], 10); } catch(e){}
+        const nowYear = new Date().getFullYear();
+        const currentAge = birthYear ? (nowYear - birthYear + 1) : null;
+
+        luckTable.innerHTML = luck.map(item => {
+            const start = typeof item.age === 'number' ? item.age : parseInt(item.age, 10);
+            const end   = start + 9;
+            const isCur = currentAge !== null && currentAge >= start && currentAge <= end;
+            const stem  = item.stem || '';
+            const branch= item.branch || '';
+            const stemEl = elOf(stem);
+            const brEl   = elOf(branch);
+            return `
+                <div class="dk-card ${isCur ? 'dk-current' : ''}">
+                    <div class="dk-age">${start}세</div>
+                    <div class="dk-god ${gc(item.ten_god)}">${item.ten_god||'-'}</div>
+                    <div class="dk-tile el-${stemEl}"><span>${stemHanja(stem)}</span><small>${stem}</small></div>
+                    <div class="dk-tile el-${brEl}"><span>${branchHanja(branch)}</span><small>${branch}</small></div>
+                    <div class="dk-twelve">${item.twelve_stage||'-'}</div>
+                    <div class="dk-dir">${item.direction||''}</div>
+                </div>`;
+        }).join('');
+
+        // 현재 대운 텍스트
+        const cur = data.current_luck || luck[0];
+        if (cur) {
+            const el = document.getElementById('current-luck-copy');
+            if (el) el.textContent =
+                `${cur.age}세부터 ${cur.ganji||''}(${cur.hanja||''}) 대운 · 십성 ${cur.ten_god||'-'} · 12운성 ${cur.twelve_stage||'-'}`;
+        }
+    }
+
+    // 간지 → 오행 & 한자 헬퍼 (간단 매핑)
+    const EL_MAP = {
+        갑:'목',을:'목',병:'화',정:'화',무:'토',기:'토',경:'금',신:'금',임:'수',계:'수',
+        자:'수',축:'토',인:'목',묘:'목',진:'토',사:'화',오:'화',미:'토',신:'금',유:'금',술:'토',해:'수'
+    };
+    const HJ_STEM = {갑:'甲',을:'乙',병:'丙',정:'丁',무:'戊',기:'己',경:'庚',신:'辛',임:'壬',계:'癸'};
+    const HJ_BRANCH = {자:'子',축:'丑',인:'寅',묘:'卯',진:'辰',사:'巳',오:'午',미:'未',신:'申',유:'酉',술:'戌',해:'亥'};
+    const elOf = ch => EL_MAP[ch] || 'etc';
+    const stemHanja   = ch => HJ_STEM[ch]   || ch;
+    const branchHanja = ch => HJ_BRANCH[ch] || ch;
 
     function renderElements(data) {
         // 새 ID: element-bars-v2 (없으면 기존 element-bars 사용)
