@@ -182,15 +182,58 @@ ELEMENT = {
     "갑": "목", "을": "목", "인": "목", "묘": "목",
     "병": "화", "정": "화", "사": "화", "오": "화",
     "무": "토", "기": "토", "진": "토", "술": "토", "축": "토", "미": "토",
-    "경": "금", "신": "금", "유": "금",
+    "경": "금", "신": "금", "유": "금",  # "신"은 여기서 천간 辛(금)
     "임": "수", "계": "수", "자": "수", "해": "수",
+    # 지지도 포함 (오행이 같으므로 무해)
+    "申": "금",  # 지지 申을 한자로 구분
 }
 YINYANG = {
-    "갑": "양", "병": "양", "무": "양", "경": "양", "임": "양",
-    "자": "양", "인": "양", "진": "양", "오": "양", "신": "양", "술": "양",
-    "을": "음", "정": "음", "기": "음", "신": "음", "계": "음",
-    "축": "음", "묘": "음", "사": "음", "미": "음", "유": "음", "해": "음",
+    # 천간 (10)
+    "갑": "양", "을": "음",
+    "병": "양", "정": "음",
+    "무": "양", "기": "음",
+    "경": "양", "신": "음",   # 천간 辛(신) = 음
+    "임": "양", "계": "음",
+    # 지지 (12) — 한글 키가 충돌하는 "신(申)"은 BRANCH_YINYANG로 분리
+    "자": "양", "축": "음",
+    "인": "양", "묘": "음",
+    "진": "양", "사": "음",
+    "오": "양", "미": "음",
+    # "신(申)" = 양지지만 천간 "신(辛)"과 한글이 같아서 BRANCH_YINYANG 별도 관리
+    "유": "음",
+    "술": "양", "해": "음",
 }
+
+# 지지 음양 (천간과 한글이 겹치는 '신(申)'까지 명시적으로 분리)
+BRANCH_YINYANG: Dict[str, str] = {
+    "자": "양", "축": "음",
+    "인": "양", "묘": "음",
+    "진": "양", "사": "음",
+    "오": "양", "미": "음",
+    "신": "양",   # 地支 申(신) = 양 ← 천간 辛(음)과 충돌하던 키
+    "유": "음",
+    "술": "양", "해": "음",
+}
+
+# 지지 본기(本氣, 主氣): 십성 계산 시 지지 대신 이 천간을 기준으로 계산
+# 전통 사주명리에서는 지지의 십성을 지장간 본기 기준으로 산출
+BRANCH_MAIN_STEM: Dict[str, str] = {
+    "자": "계",   # 子 → 癸(수음)
+    "축": "기",   # 丑 → 己(토음)
+    "인": "갑",   # 寅 → 甲(목양)
+    "묘": "을",   # 卯 → 乙(목음)
+    "진": "무",   # 辰 → 戊(토양)
+    "사": "병",   # 巳 → 丙(화양)
+    "오": "정",   # 午 → 丁(화음)
+    "미": "기",   # 未 → 己(토음)
+    "신": "경",   # 申 → 庚(금양)  ← 이 덕분에 丁일간이면 정재(正財) ✓
+    "유": "신",   # 酉 → 辛(금음)  ← 여기서 "신"은 천간 辛(음)
+    "술": "무",   # 戌 → 戊(토양)
+    "해": "임",   # 亥 → 壬(수양)
+}
+
+# 지지 여부 판별
+BRANCHES_SET = frozenset(["자","축","인","묘","진","사","오","미","신","유","술","해"])
 GENERATES = {"목": "화", "화": "토", "토": "금", "금": "수", "수": "목"}
 CONTROLS = {"목": "토", "토": "수", "수": "화", "화": "금", "금": "목"}
 
@@ -262,10 +305,30 @@ def index() -> str:
     return render_template("index.html")
 
 def ten_god(day_stem: str, target: str) -> str:
-    day_el = ELEMENT[day_stem]
-    target_el = ELEMENT[target]
-    same_polarity = YINYANG[day_stem] == YINYANG[target]
+    """십성 계산.
 
+    지지(地支)의 경우 지장간 본기(本氣)를 기준으로 계산합니다.
+    예: 申(신,양지) → 본기 庚(경,양) → 丁일간이면 정재(正財)
+
+    [버그 방지] 한글 '신'이 天干 辛(음)과 地支 申(양) 두 곳에 쓰여
+    YINYANG dict 충돌이 발생하므로, 지지는 반드시 BRANCH_MAIN_STEM을 통해
+    해당 본기 천간으로 변환한 후 음양을 판별합니다.
+    """
+    # 지지인 경우 → 본기(本氣) 천간으로 변환
+    if target in BRANCHES_SET:
+        effective = BRANCH_MAIN_STEM[target]  # 예: "신(申)" → "경(庚)"
+    else:
+        effective = target
+
+    day_el = ELEMENT[day_stem]
+    target_el = ELEMENT.get(effective, ELEMENT.get(target, ""))
+    # 음양: 천간 기준으로 판별 (YINYANG에 천간 키만 명확히 있음)
+    day_yy   = YINYANG.get(day_stem, "양")
+    target_yy = YINYANG.get(effective, YINYANG.get(target, "양"))
+    same_polarity = (day_yy == target_yy)
+
+    if not target_el:
+        return "-"
     if target_el == day_el:
         return "비견" if same_polarity else "겁재"
     if GENERATES[day_el] == target_el:
@@ -278,14 +341,20 @@ def ten_god(day_stem: str, target: str) -> str:
         return "편관" if same_polarity else "정관"
     return "-"
 
+def get_yinyang(ch: str) -> str:
+    """글자의 음양 반환. 지지는 BRANCH_YINYANG 사용."""
+    if ch in BRANCHES_SET:
+        return BRANCH_YINYANG.get(ch, "양")
+    return YINYANG.get(ch, "양")
+
 def char_payload(ch: str, day_stem: str | None = None) -> Dict[str, Any]:
     return {
         "ko": ch,
-        "hanja": HANJA[ch],
-        "element": ELEMENT[ch],
-        "yin_yang": YINYANG[ch],
+        "hanja": HANJA.get(ch, ch),
+        "element": ELEMENT.get(ch, ""),
+        "yin_yang": get_yinyang(ch),
         "ten_god": ten_god(day_stem, ch) if day_stem else "",
-        "css": f"el-{ELEMENT[ch]}",
+        "css": f"el-{ELEMENT.get(ch, 'etc')}",
     }
 
 def count_elements(chars: List[str]) -> Dict[str, int]:
