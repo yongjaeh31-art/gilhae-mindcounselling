@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>길해명리마음상담소 | 사주와 관상으로 마음을 읽는 상담소</title>
+    <meta name="description" content="반복되는 고민의 이유를 사주와 관상, 글과 상담으로 함께 읽어드립니다. 부산 서면 길해명리마음상담소 공식 홈페이지.">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script defer src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <a class="logo" href="#hero">길해명리마음상담소</a>
+        <button class="nav-toggle" type="button" aria-label="메뉴 열기">☰</button>
+        <div class="nav-links">
+            <a href="#concerns">고민 선택</a>
+            <a href="#fortune">무료 분석</a>
+            <a href="#articles">길해의 글</a>
+            <a href="#consulting">상담</a>
+            <a href="#place">예약·위치</a>
+        </div>
+    </nav>
+
+    <main>
+        <section id="hero" class="hero-section">
+            <div class="hero-copy">
+                <p class="eyebrow">사주와 관상을 인문학적으로 풀어내는 마음 상담소</p>
+                <h1>반복되는 고민에는 이유가 있습니다.</h1>
+                <p class="hero-lead">
+                    일이 막히고, 돈이 모이지 않고, 관계가 어렵고, 결혼이 고민되고,
+                    내 인생의 방향을 모르겠다면 사주는 당신을 단정하는 도구가 아니라
+                    왜 흔들리는지 이해하는 지도입니다.
+                </p>
+                <p>
+                    길해는 사주와 관상, 그리고 삶의 이야기를 통해 당신의 문제를 함께 읽고
+                    해결의 방향을 찾아드립니다.
+                </p>
+                <div class="hero-actions">
+                    <a href="#concerns" class="btn-primary">내 고민 선택하기</a>
+                    <a href="#fortune" class="btn-secondary">10초 무료 사주 분석</a>
+                    <a href="#articles" class="btn-tertiary">길해의 글 먼저 읽기</a>
+                    <a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-ghost">네이버 예약 바로가기</a>
+                </div>
+            </div>
+            <aside class="hero-note">
+                <span>길해의 공간</span>
+                <p>무섭게 겁주는 점집이 아니라, 내 문제를 말해도 안전한 작가의 상담실처럼 느껴지는 곳.</p>
+            </aside>
+        </section>
+
+        <section id="concerns" class="section concern-section">
+            <div class="section-head">
+                <p class="eyebrow">고민 선택</p>
+                <h2>지금 가장 답답한 문제는 무엇인가요?</h2>
+                <p>카드를 누르면 아래 공감 섹션에서 해당 고민으로 이동합니다.</p>
+            </div>
+            <div class="concern-grid">
+                <button class="concern-card active" type="button" data-concern="work"><strong>일·이직</strong><span>버텨야 할 때인지, 움직여야 할 때인지 몰라 답답한가요?</span></button>
+                <button class="concern-card" type="button" data-concern="money"><strong>돈·사업</strong><span>벌어도 남지 않고, 기회가 와도 불안한 흐름이 반복되나요?</span></button>
+                <button class="concern-card" type="button" data-concern="love"><strong>연애·결혼</strong><span>좋아하는데 불안하고, 결혼 앞에서 확신이 서지 않나요?</span></button>
+                <button class="concern-card" type="button" data-concern="family"><strong>가족·자녀</strong><span>가족을 사랑하지만, 어떻게 도와야 할지 모르겠나요?</span></button>
+                <button class="concern-card" type="button" data-concern="life"><strong>인생 방향</strong><span>열심히 살았는데도 제자리인 것처럼 느껴지나요?</span></button>
+                <button class="concern-card" type="button" data-concern="face"><strong>관상·사람 보는 눈</strong><span>사람을 믿어도 될지, 관계를 어떻게 봐야 할지 고민되나요?</span></button>
+            </div>
+        </section>
+
+        <section id="concern-detail" class="section empathy-section">
+            <article class="empathy-card active" data-concern-panel="work">
+                <h3>일·이직</h3>
+                <p>일을 못하는 것도 아닌데 자꾸 막히는 시기가 있습니다. 버텨야 하는 일인지, 떠나야 하는 일인지, 준비가 필요한 시기인지 구분하지 못하면 좋은 선택도 나쁜 결과가 될 수 있습니다.</p>
+                <p>사주는 내가 잘 맞는 환경과 지금 움직여야 할 때를 함께 봅니다.</p>
+                <div><a href="#fortune" class="btn-primary">내 직업운 무료로 보기</a><a href="https://booking.naver.com/booking/6/bizes/652988" class="btn-tertiary" target="_blank" rel="noopener">이 주제로 상담 예약하기</a></div>
+            </article>
+            <article class="empathy-card" data-concern-panel="money">
+                <h3>돈·사업</h3>
+                <p>돈은 단순히 많이 버는 문제가 아닙니다. 어떤 사람은 벌어도 남지 않고, 어떤 사람은 기회가 와도 감당하지 못하고, 어떤 사람은 운이 들어왔을 때 준비가 되어 있지 않습니다.</p>
+                <p>재물운은 돈의 크기보다 내가 돈을 다루는 방식과 운의 타이밍을 함께 봐야 합니다.</p>
+                <div><a href="#fortune" class="btn-primary">내 재물 흐름 확인하기</a><a href="https://contents.premium.naver.com/gilhae/mindcounselling" class="btn-tertiary" target="_blank" rel="noopener">길해의 재물운 글 보기</a></div>
+            </article>
+            <article class="empathy-card" data-concern-panel="love">
+                <h3>연애·결혼</h3>
+                <p>좋아하는 마음만으로 관계가 오래가지는 않습니다. 사랑하는데 자꾸 불안하거나, 좋은 사람인데 결혼이 망설여지거나, 반복해서 비슷한 사람을 만난다면 관계의 흐름을 다시 봐야 합니다.</p>
+                <div><a href="#fortune" class="btn-primary">내 연애·결혼 흐름 보기</a><a href="https://booking.naver.com/booking/6/bizes/652988" class="btn-tertiary" target="_blank" rel="noopener">궁합 상담 예약하기</a></div>
+            </article>
+            <article class="empathy-card" data-concern-panel="family">
+                <h3>가족·자녀</h3>
+                <p>아이의 사주는 아이를 단정하기 위한 것이 아닙니다. 부모가 어떤 밭이 되어주어야 하는지, 가족 안에서 어떤 역할과 거리가 필요한지 이해하기 위한 지도입니다.</p>
+                <div><a href="#place" class="btn-primary">가족·자녀 상담 보기</a><a href="https://contents.premium.naver.com/gilhae/mindcounselling" class="btn-tertiary" target="_blank" rel="noopener">관련 글 읽기</a></div>
+            </article>
+            <article class="empathy-card" data-concern-panel="life">
+                <h3>인생 방향</h3>
+                <p>열심히 살았는데도 제자리인 것 같은 시기가 있습니다. 그때 필요한 것은 더 큰 노력만이 아니라 내가 어느 계절에 서 있는지 아는 일입니다.</p>
+                <p>운의 봄에는 씨를 뿌리고, 여름에는 키우고, 가을에는 거두고, 겨울에는 무리하지 않아야 합니다.</p>
+                <div><a href="#fortune" class="btn-primary">내 대운 흐름 확인하기</a><a href="https://booking.naver.com/booking/6/bizes/652988" class="btn-tertiary" target="_blank" rel="noopener">1:1 상담 예약하기</a></div>
+            </article>
+            <article class="empathy-card" data-concern-panel="face">
+                <h3>관상·사람 보는 눈</h3>
+                <p>관상은 사람을 단정하는 기술이 아닙니다. 얼굴과 표정, 말투와 분위기에는 그 사람이 살아온 시간과 마음의 방향이 남습니다.</p>
+                <p>관상은 나와 타인을 이해하고 관계를 더 지혜롭게 바라보게 하는 인문학입니다.</p>
+                <div><a href="#face-reading" class="btn-primary">관상 상담 문의하기</a><a href="https://contents.premium.naver.com/gilhae/mindcounselling" class="btn-tertiary" target="_blank" rel="noopener">관상 인문학 글 읽기</a></div>
+            </article>
+        </section>
+
+        <section id="fortune" class="section fortune-section">
+            <div class="section-head">
+                <p class="eyebrow">무료 사주 분석</p>
+                <h2>10초 무료 분석으로 내 사주의 큰 구조를 먼저 확인하세요</h2>
+                <p>결과는 입력 박스 안이 아니라 아래 전체 화면 만세력 카드로 표시됩니다.</p>
+            </div>
+            <div class="fortune-layout">
+                <form id="fortune-form" class="fortune-card">
+                    <div class="form-row full">
+                        <span class="form-label">달력</span>
+                        <div class="pill-options">
+                            <label><input type="radio" name="calendar_type" value="solar" checked> 양력</label>
+                            <label><input type="radio" name="calendar_type" value="lunar"> 음력</label>
+                            <label class="leap-check"><input type="checkbox" name="is_leap" id="is_leap"> 윤달</label>
+                        </div>
+                    </div>
+                    <div class="form-grid date-grid">
+                        <label>년<select id="year" name="year" required></select></label>
+                        <label>월<select id="month" name="month" required></select></label>
+                        <label>일<select id="day" name="day" required></select></label>
+                    </div>
+                    <div class="form-grid time-grid">
+                        <label>시<select id="hour" name="hour" required></select></label>
+                        <label>분<input type="number" id="minute" name="minute" min="0" max="59" step="1" value="0" required></label>
+                    </div>
+                    <div class="form-row full">
+                        <span class="form-label">성별</span>
+                        <div class="gender-options">
+                            <label><input type="radio" name="gender" value="M" checked> 남성</label>
+                            <label><input type="radio" name="gender" value="F"> 여성</label>
+                        </div>
+                    </div>
+                    <label class="form-row">출생지
+                        <select id="birth_place" name="birth_place">
+                            <option value="서울">서울</option>
+                            <option value="부산" selected>부산</option>
+                            <option value="대구">대구</option>
+                            <option value="대전">대전</option>
+                            <option value="광주">광주</option>
+                            <option value="제주">제주</option>
+                        </select>
+                    </label>
+                    <details class="advanced-options">
+                        <summary>고급 설정 열기</summary>
+                        <label><input type="checkbox" name="use_true_solar_time" checked> 진태양시 보정 적용</label>
+                        <label>야자시/조자시 기준
+                            <select name="night_hour_rule">
+                                <option value="standard">표준 자시</option>
+                                <option value="late">야자시</option>
+                            </select>
+                        </label>
+                        <label><input type="checkbox" name="next_day_after_23" checked> 23시 이후 다음날 일주 적용</label>
+                    </details>
+                    <button type="submit" class="btn-primary fortune-submit">전체 화면으로 사주 분석 보기</button>
+                    <div id="fortune-status" class="fortune-status" aria-live="polite"></div>
+                </form>
+                <div class="fortune-copy">
+                    <h3>무료 분석은 사주의 큰 구조를 보여줍니다</h3>
+                    <p>직업, 돈, 관계, 결혼, 가족 문제는 원국만으로 풀리지 않습니다. 대운·세운·현재 상황을 함께 놓고 봐야 방향이 보입니다.</p>
+                    <p class="note">정밀 절입시각 DB가 제한되어 있어 무료 분석은 근사값을 사용합니다. 기준 검증값은 별도 보정 테이블로 확인합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="saju-result-page" class="saju-result-page" hidden>
+            <div class="result-header">
+                <div>
+                    <span class="section-kicker">이미지형 만세력 결과</span>
+                    <h2 id="result-title">나의 사주 원국 보기</h2>
+                    <p id="result-subtitle">시주 · 일주 · 월주 · 년주를 카드로 정리합니다.</p>
+                </div>
+                <div class="result-actions">
+                    <button type="button" id="result-print" class="btn-tertiary">결과 인쇄</button>
+                    <a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">네이버 예약으로 상담하기</a>
+                </div>
+            </div>
+            <div class="saju-board">
+                <div class="saju-meta">
+                    <div><strong>입력</strong><span id="meta-input">-</span></div>
+                    <div><strong>양력 변환</strong><span id="meta-solar">-</span></div>
+                    <div><strong>음력 참고</strong><span id="meta-lunar">-</span></div>
+                    <div><strong>성별</strong><span id="meta-gender">-</span></div>
+                    <div><strong>출생지</strong><span id="meta-place">-</span></div>
+                    <div><strong>적용 옵션</strong><span id="meta-options">-</span></div>
+                </div>
+                <p id="calculation-note" class="calculation-note">무료 분석용 근사 계산입니다.</p>
+                <div class="pillar-grid" id="pillar-grid"></div>
+                <div class="element-summary">
+                    <div class="element-bars" id="element-bars"></div>
+                    <div class="element-copy">
+                        <h3>오행 분포</h3>
+                        <p id="element-summary-text">오행 분포를 계산 중입니다.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="result-panels">
+                <div class="result-panel"><h3>일간 설명</h3><p id="day-master-copy">-</p></div>
+                <div class="result-panel"><h3>기본 격 설명</h3><p id="pattern-copy">-</p></div>
+                <div class="result-panel"><h3>합·충·형·파·해 포인트</h3><ul id="relation-list"></ul></div>
+                <div class="result-panel"><h3>현재 대운</h3><p id="current-luck-copy">-</p></div>
+            </div>
+            <div class="luck-section">
+                <h3>대운표</h3>
+                <div id="luck-table" class="luck-table"></div>
+            </div>
+            <div class="deep-reading">
+                <h3>무료 분석 하단 안내</h3>
+                <p>무료 분석은 사주의 큰 구조를 보여줍니다. 하지만 실제 고민은 원국만으로 풀리지 않습니다. 직업, 돈, 관계, 결혼, 가족 문제는 대운·세운·현재 상황을 함께 놓고 봐야 방향이 보입니다. 길해의 상담은 사주표를 읽는 데서 끝나지 않고, 지금 선택해야 할 현실적인 방향을 함께 정리합니다.</p>
+                <div id="advice-list" class="advice-list"></div>
+                <div class="place-actions">
+                    <a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">네이버 예약으로 상담하기</a>
+                    <a href="#articles" class="btn-secondary">길해의 글 더 읽기</a>
+                    <a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-tertiary">네프콘 구독하고 상담 할인 받기</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="articles" class="section articles-section">
+            <div class="section-head"><p class="eyebrow">길해의 글 추천</p><h2>당신의 고민과 연결되는 길해의 글</h2></div>
+            <div class="article-grid">
+                <article><h3>일·이직</h3><p>이직운, 대운, 직업운, 조직생활, 승진운</p><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">프리미엄 글 보기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
+                <article><h3>돈·사업</h3><p>재물운, 사업운, 돈이 모이지 않는 사주, 식상생재, 재성</p><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">프리미엄 글 보기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
+                <article><h3>연애·결혼</h3><p>결혼운, 궁합, 재회, 배우자운, 관계의 반복</p><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">프리미엄 글 보기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
+                <article><h3>가족·자녀</h3><p>자녀운, 부모 역할, 가족 궁합, 아이의 진로</p><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">프리미엄 글 보기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
+                <article><h3>관상</h3><p>얼굴은 마음의 흔적, 관상으로 보는 사람 이해, 처세와 관계</p><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">프리미엄 글 보기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
+            </div>
+        </section>
+
+        <section id="consulting" class="section consulting-section">
+            <div class="section-head"><p class="eyebrow">상담 안내</p><h2>길해의 상담은 사주표를 읽는 데서 끝나지 않습니다</h2><p>맞고 틀림을 말하는 시간이 아니라, 내담자가 자기 문제를 이해하고 지금 할 수 있는 선택을 정리하는 시간입니다.</p></div>
+            <ol class="process-list">
+                <li>현재 고민을 먼저 듣습니다.</li><li>생년월일시와 사주 원국을 확인합니다.</li><li>대운과 세운의 흐름을 봅니다.</li><li>반복되는 문제의 구조를 찾습니다.</li><li>현실에서 선택할 수 있는 방향을 정리합니다.</li><li>상담 후 행동 방향을 제시합니다.</li>
+            </ol>
+            <div class="center-actions"><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">네이버 예약으로 상담 시간 확인하기</a><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">네프콘 구독자 할인 상담 보기</a></div>
+        </section>
+
+        <section id="face-reading" class="section split-section">
+            <div><p class="eyebrow">관상 인문학</p><h2>관상은 사람을 단정하는 기술이 아니라, 사람을 이해하는 눈입니다</h2><p>길해의 관상은 무섭고 신비한 예언이 아닙니다. 얼굴, 표정, 말투, 분위기, 걸음걸이에는 그 사람이 살아온 시간과 마음의 방향이 남습니다.</p></div>
+            <div class="soft-panel"><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">관상 상담 문의하기</a><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">관상 인문학 글 읽기</a><a href="#classes" class="btn-tertiary">관상 강의 문의하기</a></div>
+        </section>
+
+        <section id="classes" class="section classes-section">
+            <div class="section-head"><p class="eyebrow">강의·클래스</p><h2>쉽게 배우는 길해의 사주명리학</h2></div>
+            <div class="card-grid six">
+                <article><h3>사주명리 기초반</h3><p>처음 배우는 분을 위한 음양오행과 십성 기초.</p><a href="#contact">신청/문의</a></article>
+                <article><h3>사주명리 중급반</h3><p>격국, 용신, 대운 흐름을 읽는 연습.</p><a href="#contact">신청/문의</a></article>
+                <article><h3>사주풀이 실전반</h3><p>상담 사례로 원국을 해석하는 훈련.</p><a href="#contact">신청/문의</a></article>
+                <article><h3>관상 인문학</h3><p>얼굴과 표정으로 마음의 방향을 이해합니다.</p><a href="#contact">신청/문의</a></article>
+                <article><h3>기업·단체 특강</h3><p>조직과 관계 이해를 위한 맞춤 강의.</p><a href="#contact">신청/문의</a></article>
+                <article><h3>소그룹 클래스</h3><p>작은 모임에서 차분히 배우는 실전 수업.</p><a href="#contact">신청/문의</a></article>
+            </div>
+        </section>
+
+        <section id="books" class="section books-section">
+            <div class="section-head"><p class="eyebrow">저서 소개</p><h2>길해의 상담은 글과 책으로도 이어집니다</h2></div>
+            <div class="book-grid">
+                <article><h3>『당신도 운을 벌 수 있습니다』</h3><p>인생이 내 마음처럼 안 풀릴 때, 명리학을 통해 삶의 흐름과 마음의 이치를 이해하도록 돕는 책입니다.</p><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">책 자세히 보기</a></article>
+                <article><h3>『내 인생은 어떤 얼굴을 하고 있는가』</h3><p>관상을 통해 얼굴과 삶의 흔적을 읽고, 앞으로 어떤 얼굴로 살아갈지 성찰하게 하는 책입니다.</p><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">책을 읽고 상담 예약하기</a></article>
+            </div>
+        </section>
+
+        <section id="about" class="section about-section">
+            <div class="section-head"><p class="eyebrow">길해 소개</p><h2>길해는 사람의 명과 운, 그리고 마음의 이치를 읽습니다</h2></div>
+            <div class="about-list">
+                <span>길해명리마음상담소 대표</span><span>사주명리 전문가</span><span>관상 전문가</span><span>두 권의 책을 쓴 작가</span><span>네이버 프리미엄콘텐츠 운영</span><span>상담 사례 기반 글쓰기</span><span>문화센터와 대학 강의</span><span>유튜브 채널 운영</span><span>동물과 식물을 좋아하는 따뜻한 상담가</span>
+            </div>
+            <p class="closing-copy">길해는 사람을 단정하지 않습니다. 사람이 살아온 흔적과 앞으로의 가능성을 함께 읽습니다.</p>
+        </section>
+
+        <section id="reviews" class="section reviews-section">
+            <div class="section-head"><p class="eyebrow">예시 후기</p><h2>실제 후기로 교체하기 쉬운 상담 후기 구조</h2></div>
+            <div class="card-grid three">
+                <article><span>직업 후기 예시</span><h3>상담 전 고민</h3><p>이직을 해야 할지 버텨야 할지 막막했습니다.</p><h3>상담 후 방향</h3><p>준비해야 할 시기와 움직일 시기를 나눠 생각하게 됐습니다.</p></article>
+                <article><span>연애 후기 예시</span><h3>상담 전 고민</h3><p>관계가 반복해서 불안하게 흘렀습니다.</p><h3>상담 후 방향</h3><p>내가 관계에서 피하려는 지점을 알게 됐습니다.</p></article>
+                <article><span>강의 후기 예시</span><h3>상담에서 알게 된 점</h3><p>어렵던 사주 용어가 삶의 언어로 이해됐습니다.</p><h3>상담 후 방향</h3><p>사람을 단정하지 않고 이해하는 눈이 생겼습니다.</p></article>
+            </div>
+        </section>
+
+        <section id="premium" class="section premium-section">
+            <p class="eyebrow">네이버 프리미엄콘텐츠</p>
+            <h2>상담이 아직 부담스럽다면, 길해의 글을 먼저 읽어보세요</h2>
+            <p>길해의 글은 사주명리와 관상을 어렵지 않게 풀어냅니다. 상담을 받기 전, 내 고민과 비슷한 글을 먼저 읽어보면 내 문제가 어디에서 반복되는지 조금 더 선명해집니다.</p>
+            <div class="center-actions"><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-primary">네이버 프리미엄콘텐츠 구독하기</a><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">대표 글 먼저 보기</a><a href="#place" class="btn-tertiary">구독자 상담 할인 보기</a></div>
+        </section>
+
+        <section id="place" class="section place-section">
+            <div class="section-head"><p class="eyebrow">위치·요금·예약</p><h2>길해명리마음상담소</h2></div>
+            <div class="place-grid">
+                <article class="place-card"><h3>찾아오시는 길</h3><p>부산 부산진구 서전로47번길 17 1층</p><p>서면역 8번 출구에서 약 471m, 부산진소방서 도보 1분, 전포초 인근</p><p><a href="tel:050713607038">0507-1360-7038</a></p><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">네이버 예약 바로가기</a><a href="https://map.naver.com/p/entry/place/1807909592" target="_blank" rel="noopener" class="btn-tertiary">네이버 지도에서 보기</a></article>
+                <article class="price-card"><h3>상담 요금표</h3><div class="price-list"><span>1인 사주상담</span><strong>70,000원</strong><span>네프콘 구독자 1인 사주상담</span><strong>60,000원</strong><span>2인 사주·궁합상담</span><strong>120,000원</strong><span>네프콘 구독자 2인 상담</span><strong>100,000원</strong><span>가족 상담</span><strong>추후 조정 가능</strong><span>기업 면접 관상·사주 출장</span><strong>협의</strong></div></article>
+            </div>
+        </section>
+
+        <section id="faq" class="section faq-section">
+            <div class="section-head"><p class="eyebrow">FAQ</p><h2>처음 상담을 고민하는 분들을 위해</h2></div>
+            <div class="faq-list">
+                <details open><summary>사주를 처음 봐도 괜찮나요?</summary><p>괜찮습니다. 어려운 용어보다 지금의 고민을 이해하는 데 필요한 언어로 설명드립니다.</p></details>
+                <details><summary>생년월일시를 정확히 몰라도 상담 가능한가요?</summary><p>가능합니다. 다만 시간이 정확할수록 시주와 대운 해석이 선명해집니다.</p></details>
+                <details><summary>전화상담도 가능한가요?</summary><p>가능한 일정은 네이버 예약 또는 전화 문의로 확인하시면 됩니다.</p></details>
+                <details><summary>궁합상담은 두 사람 정보가 모두 필요한가요?</summary><p>두 사람의 생년월일시가 있으면 더 구체적으로 볼 수 있습니다.</p></details>
+                <details><summary>상담에서 나쁜 말만 듣게 되나요?</summary><p>사주는 겁을 주기 위한 도구가 아닙니다. 길해의 상담은 지금의 고민을 정리하고 앞으로의 선택을 더 지혜롭게 하기 위한 시간입니다.</p></details>
+                <details><summary>네프콘 구독자는 상담 할인이 있나요?</summary><p>네이버 프리미엄콘텐츠 구독자 상담 상품은 별도 안내 금액으로 운영됩니다.</p></details>
+                <details><summary>강의나 기업 특강도 가능한가요?</summary><p>가능합니다. 소그룹, 문화센터, 기업·단체 특강은 문의 후 일정과 주제를 조율합니다.</p></details>
+            </div>
+        </section>
+
+        <section id="contact" class="final-cta">
+            <h2>혼자 오래 끌어안은 고민이라면, 이제는 함께 읽어볼 시간입니다</h2>
+            <p>지금의 고민이 왜 반복되는지, 어떤 흐름 속에 있는지, 앞으로 무엇을 선택해야 하는지 알고 싶다면 길해가 사주와 관상, 그리고 삶의 이야기로 함께 읽어드립니다.</p>
+            <div class="center-actions"><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">네이버 예약으로 상담 신청하기</a><a href="#fortune" class="btn-secondary">무료 사주 분석 다시 해보기</a><a href="#articles" class="btn-tertiary">길해의 글 먼저 읽기</a></div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 길해명리마음상담소. 사주와 관상은 삶을 이해하기 위한 지도입니다.</p>
+    </footer>
+</body>
+</html>
