@@ -312,10 +312,10 @@ body.lunar-mode .leap-check { opacity: 1; }
     font-size: .78rem;
 }
 .calculation-note { padding: .8rem 1rem; background: #fff8df; margin: 0; }
+/* .pillar-grid — manse_table.css에서 override (display:block) */
 .pillar-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    border-top: 1px solid var(--line);
+    display: block;  /* manse-table이 전체 너비 사용하도록 */
+    border: none;
 }
 .pillar-card {
     padding: 1rem .7rem;
