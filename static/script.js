@@ -215,6 +215,30 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
+    // 신살 렌더링
+    function renderShinsal(data) {
+        const el = document.getElementById('shinsal-list');
+        if (!el) return;
+        const shinsal = data.shinsal || [];
+        if (!shinsal.length) { el.innerHTML = '<span style="color:#888">-</span>'; return; }
+        el.innerHTML = shinsal.map(s =>
+            `<span class="shinsal-tag">${s}</span>`
+        ).join('');
+    }
+
+    // 세운 렌더링
+    function renderAnnualFortune(data) {
+        const el = document.getElementById('annual-fortune');
+        if (!el) return;
+        const af = data.annual_fortune || {};
+        if (!af.간지) { el.innerHTML = '-'; return; }
+        el.innerHTML = `
+            <strong>${af.년도 || ''}</strong>
+            <span class="luck-ganji">${af.간지 || ''}</span>
+            <span class="luck-god">${af.십성 || ''}</span>
+            <small>${af.나이 || ''}</small>`;
+    }
+
     function renderResult(data) {
         resultPage.hidden = false;
         const options = data.input?.options || {};
@@ -237,6 +261,8 @@ document.addEventListener('DOMContentLoaded', () => {
         renderRelations(data);
         renderLuck(data);
         renderAdvice(data);
+        renderShinsal(data);
+        renderAnnualFortune(data);
 
         setText('day-master-copy', `${dayMaster.일간 || '-'}(${dayMaster.hanja || ''}) 일간입니다. ${dayMaster.description || dayMaster.특성 || ''}`);
         setText('pattern-copy', `${data.pattern?.격 || '-'}: ${data.pattern?.특성 || ''}`);

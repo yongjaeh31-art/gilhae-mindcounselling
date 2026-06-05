@@ -470,6 +470,26 @@ body.lunar-mode .leap-check { opacity: 1; }
     font-weight: 900;
 }
 
+/* 신살 태그 */
+.shinsal-wrap { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.shinsal-tag {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    background: #fff8df;
+    border: 1px solid #e8c86a;
+    color: #7a5a00;
+    border-radius: 999px;
+}
+/* 세운 */
+.annual-fortune-wrap { display: flex; flex-direction: column; gap: 0.4rem; }
+.annual-fortune-wrap strong { font-size: 1rem; font-weight: 800; color: var(--purple); }
+.annual-fortune-wrap .luck-ganji { font-family: 'Noto Serif KR',serif; font-size: 1.5rem; font-weight: 800; color: var(--purple); }
+.annual-fortune-wrap .luck-god { display: inline-block; font-size: 0.78rem; font-weight: 700; color: var(--purple2); background: var(--purple-pale); padding: 0.15rem 0.55rem; border-radius: 999px; }
+.annual-fortune-wrap small { font-size: 0.8rem; color: var(--text-soft); }
+/* 계산 엔진 표시 */
+.calculation-note.precise { background: #e8f4e8; border-color: #4a9455; color: #1a5a1a; }
 .article-grid, .card-grid, .book-grid, .place-grid {
     max-width: 1180px;
     margin: 0 auto;

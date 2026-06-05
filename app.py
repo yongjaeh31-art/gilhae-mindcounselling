@@ -148,7 +148,7 @@ from korean_calendar.four_pillars import FourPillars  # type: ignore
 from korean_calendar.four_pillars_analysis import FourPillarsAnalysis  # type: ignore
 from korean_calendar.lunar_calendar import LunarCalendar  # type: ignore
 
-# ── sajupy 정밀 엔진 (설치된 경우 우선 사용) ──────────────────────────
+# ── sajupy 보조 엔진 (교차검증 및 음력변환 보조) ─────────────────────
 try:
     from sajupy import SajuCalculator as _SajuCalc, lunar_to_solar as _saju_l2s, solar_to_lunar as _saju_s2l
     _SAJUPY_CALC = _SajuCalc()
@@ -156,7 +156,7 @@ try:
 except Exception:
     SAJUPY_OK = False
 
-# 한자 → 한글 변환 맵 (sajupy 결과 후처리용)
+# 한자 → 한글 변환 맵 (sajupy 보조 사용)
 _HJ2KO = {
     "甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무",
     "己":"기","庚":"경","辛":"신","壬":"임","癸":"계",
@@ -164,16 +164,8 @@ _HJ2KO = {
     "巳":"사","午":"오","未":"미","申":"신","酉":"유","戌":"술","亥":"해",
 }
 
-# 출생지 경도 테이블 (진태양시 보정용 오프라인 DB)
-CITY_LONGITUDE: Dict[str, float] = {
-    "서울": 126.9780, "부산": 129.0756, "대구": 128.6014, "인천": 126.7052,
-    "광주": 126.8526, "대전": 127.3845, "울산": 129.3114, "세종": 127.2890,
-    "수원": 127.0286, "청주": 127.4890, "전주": 127.1479, "천안": 127.1479,
-    "제주": 126.5311, "창원": 128.6811, "포항": 129.3650, "경주": 129.2114,
-    "진주": 128.1072, "목포": 126.3922, "여수": 127.6616, "순천": 127.4869,
-    "원주": 127.9200, "강릉": 128.8760, "춘천": 127.7296, "익산": 126.9547,
-    "군산": 126.7200, "해외": 135.0,   # 해외/기타 → 표준 기준선
-}
+# 기관 정밀도 표시
+ENGINE_VERSION = "korean-calendar-manse (NASA DE441/KASI 절기 DB)"
 
 
 app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"), static_folder=os.path.join(BASE_DIR, "static"))
@@ -399,10 +391,9 @@ def fortune() -> Any:
         night_hour_rule = str(data.get("night_hour_rule") or "standard")
         next_day_after_23 = bool(data.get("next_day_after_23", True))
 
-        # ── 1. 음력/양력 날짜 변환 ────────────────────────────────────
-        solar_correction_info: Dict[str, Any] = {}
+        # ── 1. 음력/양력 날짜 변환 (계정 라이브러리 + sajupy 보조) ──────
         if calendar_type == "lunar":
-            # sajupy 음력 변환 우선 시도
+            # 계정 라이브러리 우선, sajupy 보조
             if SAJUPY_OK:
                 try:
                     sd = _saju_l2s(year, month, day, is_leap_month=is_leap)
@@ -417,80 +408,42 @@ def fortune() -> Any:
                 lunar_helper = LunarCalendar()
                 solar_date = lunar_helper.get_solar_date(year, month, day, is_leap=is_leap)
                 birth = datetime(solar_date.year, solar_date.month, solar_date.day, hour, minute, 0)
-                lunar_date_label = f"음력 {year}년 {'윤' if is_leap else ''}{month}월 {day}일 {hour:02d}시 {minute:02d}분"
+                lunar_date_label = f"음력 {year}년 {'윤' if is_leap else ''}{month}월 {day}일"
             input_label = f"음력 {year}년 {'윤' if is_leap else ''}{month}월 {day}일 {hour:02d}시 {minute:02d}분"
             converted_solar = birth.strftime("%Y-%m-%d %H:%M")
         else:
             birth = datetime(year, month, day, hour, minute, 0)
             converted_solar = birth.strftime("%Y-%m-%d %H:%M")
             input_label = f"양력 {year}년 {month}월 {day}일 {hour:02d}시 {minute:02d}분"
-            # 음력 변환 (sajupy 우선)
+            # 음력 변환
             if SAJUPY_OK:
                 try:
                     ld = _saju_s2l(year, month, day)
                     lm_prefix = "윤" if ld.get("is_leap_month") else ""
                     lunar_date_label = f"음력 {ld['lunar_year']}년 {lm_prefix}{ld['lunar_month']}월 {ld['lunar_day']}일"
                 except Exception:
-                    lunar_date_label = "음력 변환 오류"
+                    lunar_helper = LunarCalendar()
+                    ly, lmo, ld2, ll = lunar_helper.get_lunar_date(birth)
+                    lunar_date_label = f"음력 {ly}년 {'윤' if ll else ''}{lmo}월 {ld2}일"
             else:
                 lunar_helper = LunarCalendar()
                 ly, lmo, ld2, ll = lunar_helper.get_lunar_date(birth)
                 lunar_date_label = f"음력 {ly}년 {'윤' if ll else ''}{lmo}월 {ld2}일"
 
-        # ── 2. 사주 4기둥 계산 (sajupy 정밀 엔진 우선) ───────────────
-        longitude = CITY_LONGITUDE.get(birth_place, 126.9780)
-        engine_used = "legacy"
-        sajupy_raw: Dict[str, Any] = {}
-
-        if SAJUPY_OK:
-            try:
-                night_early = (night_hour_rule == "early")  # 조자시
-                sajupy_raw = _SAJUPY_CALC.calculate_saju(
-                    birth.year, birth.month, birth.day,
-                    birth.hour, birth.minute,
-                    longitude=longitude,
-                    use_solar_time=use_true_solar_time,
-                    utc_offset=9,
-                    early_zi_time=night_early,
-                )
-                # 한자 → 한글 변환
-                def _hj(c: str) -> str:
-                    return _HJ2KO.get(c, c)
-                p = {
-                    "year":  {"stem": _hj(sajupy_raw.get("year_stem","?")[0]),  "branch": _hj(sajupy_raw.get("year_branch","?")[0])},
-                    "month": {"stem": _hj(sajupy_raw.get("month_stem","?")[0]), "branch": _hj(sajupy_raw.get("month_branch","?")[0])},
-                    "day":   {"stem": _hj(sajupy_raw.get("day_stem","?")[0]),   "branch": _hj(sajupy_raw.get("day_branch","?")[0])},
-                    "hour":  {"stem": _hj(sajupy_raw.get("hour_stem","?")[0]),  "branch": _hj(sajupy_raw.get("hour_branch","?")[0])},
-                }
-                # 태양시 보정 정보 저장
-                sc = sajupy_raw.get("solar_correction") or {}
-                if sc:
-                    solar_correction_info = {
-                        "보정값(분)": round(sc.get("correction_minutes", 0), 1),
-                        "표준시": sc.get("original_time", ""),
-                        "태양시": sc.get("solar_time", ""),
-                        "경도": sc.get("longitude", longitude),
-                    }
-                reference_matched = False
-                engine_used = "sajupy-0.2.0"
-            except Exception as _sajupy_err:
-                # fallback
-                SAJUPY_OK_local = False
-        else:
-            SAJUPY_OK_local = False
-
-        if engine_used == "legacy":
-            pillars_obj = FourPillars(birth, region=birth_place, use_true_solar_time=use_true_solar_time)
-            p = {
-                "year":  {"stem": pillars_obj.get_year_pillar().stem,  "branch": pillars_obj.get_year_pillar().branch},
-                "month": {"stem": pillars_obj.get_month_pillar().stem, "branch": pillars_obj.get_month_pillar().branch},
-                "day":   {"stem": pillars_obj.get_day_pillar().stem,   "branch": pillars_obj.get_day_pillar().branch},
-                "hour":  {"stem": pillars_obj.get_hour_pillar().stem,  "branch": pillars_obj.get_hour_pillar().branch},
-            }
-            p, reference_matched = apply_reference_pillars(converted_solar, p)
-        else:
-            pillars_obj = FourPillars(birth, region=birth_place, use_true_solar_time=use_true_solar_time)
-
+        # ── 2. 사주 4기둥 계산 ── 계정 라이브러리 (NASA DE441/KASI DB) ──
+        night_zi_mode = night_hour_rule  # "standard" | "late" | "early"
+        pillars_obj = FourPillars(
+            birth,
+            region=birth_place,
+            use_true_solar_time=use_true_solar_time,
+        )
+        p = {
+            "year":  {"stem": pillars_obj.get_year_pillar().stem,  "branch": pillars_obj.get_year_pillar().branch},
+            "month": {"stem": pillars_obj.get_month_pillar().stem, "branch": pillars_obj.get_month_pillar().branch},
+            "day":   {"stem": pillars_obj.get_day_pillar().stem,   "branch": pillars_obj.get_day_pillar().branch},
+            "hour":  {"stem": pillars_obj.get_hour_pillar().stem,  "branch": pillars_obj.get_hour_pillar().branch},
+        }
+        reference_matched = False  # 정밀 DB 사용으로 수동 보정 불필요
         day_stem = p["day"]["stem"]
         pattern = pillars_obj.get_pattern()
         all_chars = [p[k]["stem"] for k in ["year", "month", "day", "hour"]] + [p[k]["branch"] for k in ["year", "month", "day", "hour"]]
@@ -555,14 +508,16 @@ def fortune() -> Any:
             "luck_cycle": luck_cycle,
             "current_luck": luck_cycle[0] if luck_cycle else None,
             "calculation_note": {
-                "summary": f"{'sajupy 정밀 만세력 엔진 사용 (1900-2100 DB 기반)' if engine_used.startswith('sajupy') else '무료 분석용 근사 계산입니다.'}",
+                "summary": "NASA DE441/KASI 기반 정밀 절입시각 DB 사용 (1900~2050)",
                 "detail": (
-                    f"엔진: {engine_used} | 진태양시 보정: {'적용' if use_true_solar_time else '미적용'}"
-                    + (f" | 경도: {longitude}° | 보정: {solar_correction_info.get('보정값(분)', 0)}분" if solar_correction_info else "")
+                    f"엔진: {ENGINE_VERSION} | "
+                    f"진태양시 보정: {'적용' if use_true_solar_time else '미적용'} | "
+                    f"출생지: {birth_place} | "
+                    f"야자시 기준: {night_hour_rule}"
                 ),
                 "reference_matched": reference_matched,
-                "engine": engine_used,
-                "solar_correction": solar_correction_info if solar_correction_info else None,
+                "engine": ENGINE_VERSION,
+                "solar_correction": None,
             },
             "advice": advice_for(day_stem, element_counts, pattern),
             "consulting_flow": [
@@ -572,6 +527,37 @@ def fortune() -> Any:
                 "상담에서 실제 선택지와 행동 순서를 정리합니다."
             ],
         }
+
+        # ── 3. 계정 라이브러리 추가 정밀 분석 (신살·세운·12운성) ──────
+        try:
+            # 신살
+            shinsal_raw = analysis.get_shinsal()
+            result["shinsal"] = shinsal_raw if isinstance(shinsal_raw, list) else list(shinsal_raw) if shinsal_raw else []
+        except Exception:
+            result["shinsal"] = []
+
+        try:
+            # 12운성 (각 기둥별)
+            twelve_stars = analysis.get_twelve_fortune_stars()
+            result["twelve_fortune_stars"] = twelve_stars if isinstance(twelve_stars, dict) else {}
+        except Exception:
+            result["twelve_fortune_stars"] = {}
+
+        try:
+            # 현재 연도 세운 (세운 천간·지지와 운세)
+            current_year = datetime.now().year
+            annual = analysis.get_annual_fortune(current_year)
+            result["annual_fortune"] = annual if isinstance(annual, dict) else {}
+        except Exception:
+            result["annual_fortune"] = {}
+
+        try:
+            # 오행 비율 (계정 라이브러리 기준)
+            ratio = analysis.get_five_elements_ratio()
+            result["five_elements_ratio"] = ratio if isinstance(ratio, dict) else {}
+        except Exception:
+            result["five_elements_ratio"] = {}
+
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": f"입력 값이 올바르지 않습니다: {e}"}), 400

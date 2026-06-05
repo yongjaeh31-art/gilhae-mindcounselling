@@ -250,10 +250,10 @@ class TenGods:
         elif FiveElements.GENERATING[self.day_element] == target_element:
             return "식신" if self.day_yinyang == target_yinyang else "상관"
         elif FiveElements.CONQUERING[self.day_element] == target_element:
-            return "정재" if self.day_yinyang == target_yinyang else "편재"
+            return "편재" if self.day_yinyang == target_yinyang else "정재"
         elif FiveElements.CONQUERING[target_element] == self.day_element:
-            return "정관" if self.day_yinyang == target_yinyang else "편관"
+            return "편관" if self.day_yinyang == target_yinyang else "정관"
         elif FiveElements.GENERATING[target_element] == self.day_element:
-            return "정인" if self.day_yinyang == target_yinyang else "편인"
+            return "편인" if self.day_yinyang == target_yinyang else "정인"
         else:
             return None 

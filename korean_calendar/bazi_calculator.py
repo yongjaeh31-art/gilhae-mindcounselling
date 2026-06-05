@@ -21,6 +21,9 @@ class BaziCalculator:
         birth_time: int | None = None,
         region: str | None = "서울",
         use_true_solar_time: bool = True,
+        longitude: float | None = None,
+        day_change: str = "zi",
+        use_true_solar_for_terms: bool = False,
     ) -> Dict[str, Tuple[str, str]]:
         """사주팔자를 계산한다.
 
@@ -29,6 +32,10 @@ class BaziCalculator:
             birth_time: 0-23 사이 출생시. 지정하면 ``birth_date``의 hour를 대체한다.
             region: 진태양시 보정 지역. 기본값은 서울.
             use_true_solar_time: True이면 지역 보정을 적용한다.
+            longitude: 출생지 경도. 지정하면 지역명보다 우선한다.
+            day_change: 일주 경계. ``zi``는 23시 일변경, ``midnight``는 0시 일변경,
+                ``split_zi``는 야자시/조자시 분리 기준이다.
+            use_true_solar_for_terms: True이면 년주/월주 절입 경계에도 진태양시를 적용한다.
 
         Returns:
             ``year_pillar``, ``month_pillar``, ``day_pillar``, ``time_pillar`` 키를 가진 딕셔너리.
@@ -38,7 +45,14 @@ class BaziCalculator:
                 raise ValueError("birth_time은 0부터 23 사이여야 합니다.")
             birth_date = birth_date.replace(hour=birth_time)
 
-        pillars = FourPillars(birth_date, region=region, use_true_solar_time=use_true_solar_time)
+        pillars = FourPillars(
+            birth_date,
+            region=region,
+            use_true_solar_time=use_true_solar_time,
+            longitude=longitude,
+            day_change=day_change,
+            use_true_solar_for_terms=use_true_solar_for_terms,
+        )
         return {
             "year_pillar": self._as_tuple(pillars.get_year_pillar()),
             "month_pillar": self._as_tuple(pillars.get_month_pillar()),
@@ -60,6 +74,9 @@ class BaziCalculator:
         is_leap: bool = False,
         region: str | None = "서울",
         use_true_solar_time: bool = True,
+        longitude: float | None = None,
+        day_change: str = "zi",
+        use_true_solar_for_terms: bool = False,
     ) -> Dict[str, Tuple[str, str]]:
         """음력 생년월일시를 받아 사주팔자를 계산한다."""
         solar_date = LunarCalendar().get_solar_date(year, month, day, is_leap=is_leap)
@@ -68,4 +85,7 @@ class BaziCalculator:
             solar_date,
             region=region,
             use_true_solar_time=use_true_solar_time,
+            longitude=longitude,
+            day_change=day_change,
+            use_true_solar_for_terms=use_true_solar_for_terms,
         )

@@ -6,9 +6,11 @@ from datetime import datetime, timedelta
 try:
     from .four_pillars import FourPillars
     from .five_elements import FiveElements, TenGods
+    from .solar_terms import get_next_major_term, get_previous_major_term, get_year_solar_terms
 except ImportError:
     from four_pillars import FourPillars
     from five_elements import FiveElements, TenGods
+    from solar_terms import get_next_major_term, get_previous_major_term, get_year_solar_terms
 import math
 import difflib
 
@@ -148,7 +150,16 @@ class FourPillarsAnalysis:
     # 천간 목록
     HEAVENLY_STEMS = ["갑", "을", "병", "정", "무", "기", "경", "신", "임", "계"]
     
-    def __init__(self, date: datetime, gender: str, region: str = "서울", use_true_solar_time: bool = True):
+    def __init__(
+        self,
+        date: datetime,
+        gender: str,
+        region: str = "서울",
+        use_true_solar_time: bool = True,
+        longitude: float | None = None,
+        day_change: str = "zi",
+        use_true_solar_for_terms: bool = False,
+    ):
         """초기화
         
         Args:
@@ -168,7 +179,14 @@ class FourPillarsAnalysis:
         self.input_date = date
         self.gender = gender
         self.region = region
-        self.pillars = FourPillars(date, region=region, use_true_solar_time=use_true_solar_time)
+        self.pillars = FourPillars(
+            date,
+            region=region,
+            use_true_solar_time=use_true_solar_time,
+            longitude=longitude,
+            day_change=day_change,
+            use_true_solar_for_terms=use_true_solar_for_terms,
+        )
         self.date = self.pillars.date
         
     def get_day_master_analysis(self) -> Dict[str, str]:
@@ -261,63 +279,13 @@ class FourPillarsAnalysis:
 
         # 절입 시각 기반 대운수 계산
         birth = self.date
-        year_terms = self._get_year_terms(birth.year)
-        # 12절기명 리스트
-        major_term_names = [
-            "입춘", "경칩", "청명", "입하", "망종", "소서",
-            "입추", "백로", "한로", "입동", "대설", "소한"
-        ]
-        all_term_names = [
-            "입춘", "우수", "경칩", "춘분", "청명", "곡우",
-            "입하", "소만", "망종", "하지", "소서", "대서",
-            "입추", "처서", "백로", "추분", "한로", "상강",
-            "입동", "소설", "대설", "동지", "소한", "대한"
-        ]
-        major_terms = []
-        for i, t in enumerate(year_terms):
-            if all_term_names[i % 24] in major_term_names:
-                major_terms.append(datetime.fromisoformat(t))
-        major_terms.sort()
-        
-        # 출생월 절입, 다음달 절입 찾기
-        this_month_term = None
-        next_month_term = None
-        prev_month_term = None
-        
-        # 출생일과 같은 절기 찾기
-        for i, term in enumerate(major_terms):
-            if term.date() == birth.date():
-                this_month_term = term
-                if is_forward:
-                    if i+1 < len(major_terms):
-                        next_month_term = major_terms[i+1]
-                else:
-                    if i-1 >= 0:
-                        prev_month_term = major_terms[i-1]
-                break
-            elif term < birth:
-                prev_month_term = term
-            elif term > birth and not next_month_term:
-                next_month_term = term
-        
-        # 대운수 계산
-        if this_month_term and this_month_term.date() == birth.date():
-            # 출생일이 절기와 같은 경우
-            start_age = 1
+        if is_forward:
+            next_month_term = get_next_major_term(birth)
+            delta_days = (next_month_term[1] - birth).total_seconds() / 86400 if next_month_term else 0
         else:
-            # 출생일이 절기와 다른 경우
-            if is_forward:
-                if next_month_term:
-                    delta_days = (next_month_term - birth).total_seconds() / 86400
-                else:
-                    delta_days = 0
-            else:
-                if prev_month_term:
-                    delta_days = (birth - prev_month_term).total_seconds() / 86400
-                else:
-                    delta_days = 0
-            days = delta_days
-            start_age = self._calculate_luck_start_age(days)
+            prev_month_term = get_previous_major_term(birth)
+            delta_days = (birth - prev_month_term[1]).total_seconds() / 86400 if prev_month_term else 0
+        start_age = self._calculate_luck_start_age(delta_days)
         
         # 대운 시작 연령 계산 (10년 단위로 증가)
         change_ages = [start_age + i*10 for i in range(10)]  # 10대운
@@ -450,7 +418,14 @@ class FourPillarsAnalysis:
             "무술": "실천과 발전의 시기",
             "기해": "성찰과 정리의 시기"
         }
-        return characteristics.get(luck_pillar, "알 수 없음")
+        if luck_pillar in characteristics:
+            return characteristics[luck_pillar]
+        stem, branch = luck_pillar[0], luck_pillar[1]
+        stem_element = FiveElements.HEAVENLY_STEMS_ELEMENTS.get(stem, "")
+        branch_element = FiveElements.EARTHLY_BRANCHES_ELEMENTS.get(branch, "")
+        if stem_element and branch_element:
+            return f"{stem_element}와 {branch_element} 기운이 작용하는 변화의 시기"
+        return "대운 간지의 기운을 종합해 해석하는 시기"
         
     def get_pattern(self) -> Dict[str, str]:
         """격(格) 찾기
@@ -663,27 +638,345 @@ class FourPillarsAnalysis:
             result.append(f"{s}{b}")
         return result
 
-    def get_shinsal(self):
-        """신살 간단 표 반환 (천을귀인, 화개살, 현침살, 양인살 등)"""
-        # 예시: 각 기둥별로 대표 신살만 표기
-        shinsal_table = {
-            "천을귀인": ["축", "미"],
-            "화개살": ["미", "해", "묘", "축"],
-            "현침살": ["진", "술"],
-            "양인살": ["인", "묘", "오", "유"],
-            "금여성": ["신", "유"],
-            "관귀학관": ["자", "오"],
-            "역마살": ["신", "자", "진", "오"],
-            "고신살": ["술", "미"],
-            "괴강살": ["진", "술"],
-            "천문성": ["인", "신"]
+    def get_annual_fortune(self, target_year: int) -> Dict[str, str]:
+        """지정 연도의 세운을 반환한다."""
+        if not 1900 <= target_year <= 2050:
+            raise ValueError("세운은 1900년부터 2050년까지 계산할 수 있습니다.")
+        fortune_pillars = FourPillars(datetime(target_year, 7, 1), use_true_solar_time=False)
+        pillar = fortune_pillars.get_year_pillar()
+        ten_god = TenGods(self.pillars.get_day_pillar().stem).get_god(pillar.stem)
+        return {
+            "년도": f"{target_year}년",
+            "간지": f"{pillar.stem}{pillar.branch}",
+            "천간": pillar.stem,
+            "지지": pillar.branch,
+            "십성": ten_god,
+            "나이": f"{target_year - self.input_date.year + 1}세",
         }
-        result = {}
-        for name, branches in shinsal_table.items():
-            result[name] = []
-            for pillar in [self.pillars.get_year_pillar().branch, self.pillars.get_month_pillar().branch, self.pillars.get_day_pillar().branch, self.pillars.get_hour_pillar().branch]:
-                if pillar in branches:
-                    result[name].append(pillar)
+
+    def get_monthly_fortune(self, target_year: int) -> List[Dict[str, str]]:
+        """지정 연도의 12절 기준 월운 목록을 반환한다."""
+        if not 1900 <= target_year <= 2050:
+            raise ValueError("월운은 1900년부터 2050년까지 계산할 수 있습니다.")
+        month_names = {
+            "입춘": "인월", "경칩": "묘월", "청명": "진월", "입하": "사월",
+            "망종": "오월", "소서": "미월", "입추": "신월", "백로": "유월",
+            "한로": "술월", "입동": "해월", "대설": "자월", "소한": "축월",
+        }
+        major_order = ["입춘", "경칩", "청명", "입하", "망종", "소서", "입추", "백로", "한로", "입동", "대설"]
+        terms = {name: term_date for name, term_date in get_year_solar_terms(target_year)}
+        if target_year + 1 <= 2050:
+            terms.update({name: term_date for name, term_date in get_year_solar_terms(target_year + 1) if name == "소한"})
+            major_order.append("소한")
+
+        ten_gods = TenGods(self.pillars.get_day_pillar().stem)
+        result = []
+        for term_name in major_order:
+            if term_name not in terms:
+                continue
+            term_date = terms[term_name]
+            fortune_pillars = FourPillars(term_date, use_true_solar_time=False)
+            pillar = fortune_pillars.get_month_pillar()
+            result.append({
+                "월": month_names[term_name],
+                "절기": term_name,
+                "절입시각": term_date.isoformat(sep=" "),
+                "간지": f"{pillar.stem}{pillar.branch}",
+                "천간": pillar.stem,
+                "지지": pillar.branch,
+                "십성": ten_gods.get_god(pillar.stem),
+            })
+        return result
+
+    def get_month_fortune_for(self, target_year: int, target_month: int) -> Dict[str, str]:
+        """지정 양력 월이 속한 절기월의 월운을 반환한다."""
+        if not 1 <= target_month <= 12:
+            raise ValueError("월은 1부터 12 사이여야 합니다.")
+        date = datetime(target_year, target_month, 15)
+        fortune_pillars = FourPillars(date, use_true_solar_time=False)
+        pillar = fortune_pillars.get_month_pillar()
+        ten_god = TenGods(self.pillars.get_day_pillar().stem).get_god(pillar.stem)
+        return {
+            "년도": f"{target_year}년",
+            "양력월": f"{target_month}월",
+            "간지": f"{pillar.stem}{pillar.branch}",
+            "천간": pillar.stem,
+            "지지": pillar.branch,
+            "십성": ten_god,
+        }
+
+    def get_shinsal(self):
+        """주요 신살을 표 기반으로 반환한다.
+
+        일간 기준 귀인류, 년지/일지 삼합국 기준 신살류, 일주 기준 특수살을
+        함께 표시한다. 학파별 차이가 큰 신살은 기본 보조 정보로 제공한다.
+        """
+        pillars = [
+            ("년주", self.pillars.get_year_pillar()),
+            ("월주", self.pillars.get_month_pillar()),
+            ("일주", self.pillars.get_day_pillar()),
+            ("시주", self.pillars.get_hour_pillar()),
+        ]
+        branches = [(label, pillar.branch) for label, pillar in pillars]
+        stems = [(label, pillar.stem) for label, pillar in pillars]
+        day_stem = self.pillars.get_day_pillar().stem
+        day_branch = self.pillars.get_day_pillar().branch
+        year_branch = self.pillars.get_year_pillar().branch
+        month_branch = self.pillars.get_month_pillar().branch
+        day_pillar = f"{self.pillars.get_day_pillar().stem}{day_branch}"
+
+        result: Dict[str, List[str]] = {}
+
+        def add(name: str, value: str):
+            result.setdefault(name, []).append(value)
+
+        def add_branch_hits(name: str, targets: List[str]):
+            for label, branch in branches:
+                if branch in targets:
+                    add(name, f"{label}{branch}")
+
+        def add_stem_hits(name: str, targets: List[str]):
+            for label, stem in stems:
+                if stem in targets:
+                    add(name, f"{label}{stem}")
+
+        def add_ganzhi_hits(name: str, targets: List[str]):
+            for label, pillar in pillars:
+                value = f"{pillar.stem}{pillar.branch}"
+                if value in targets:
+                    add(name, f"{label}{value}")
+
+        stem_based = {
+            "천을귀인": {
+                "갑": ["축", "미"], "무": ["축", "미"], "경": ["축", "미"],
+                "을": ["자", "신"], "기": ["자", "신"],
+                "병": ["해", "유"], "정": ["해", "유"],
+                "신": ["인", "오"],
+                "임": ["묘", "사"], "계": ["묘", "사"],
+            },
+            "문창귀인": {
+                "갑": ["사"], "을": ["오"], "병": ["신"], "정": ["유"], "무": ["신"],
+                "기": ["유"], "경": ["해"], "신": ["자"], "임": ["인"], "계": ["묘"],
+            },
+            "학당귀인": {
+                "갑": ["해"], "을": ["오"], "병": ["인"], "정": ["유"], "무": ["인"],
+                "기": ["유"], "경": ["사"], "신": ["자"], "임": ["신"], "계": ["묘"],
+            },
+            "양인살": {
+                "갑": ["묘"], "을": ["인"], "병": ["오"], "정": ["사"], "무": ["오"],
+                "기": ["사"], "경": ["유"], "신": ["신"], "임": ["자"], "계": ["해"],
+            },
+            "홍염살": {
+                "갑": ["오"], "을": ["오"], "병": ["인"], "정": ["미"], "무": ["진"],
+                "기": ["미"], "경": ["술"], "신": ["유"], "임": ["자"], "계": ["신"],
+            },
+            "암록": {
+                "갑": ["해"], "을": ["술"], "병": ["신"], "정": ["미"], "무": ["신"],
+                "기": ["미"], "경": ["사"], "신": ["진"], "임": ["인"], "계": ["축"],
+            },
+            "협록": {
+                "갑": ["묘"], "을": ["인"], "병": ["오"], "정": ["사"], "무": ["오"],
+                "기": ["사"], "경": ["유"], "신": ["신"], "임": ["자"], "계": ["해"],
+            },
+            "금여": {
+                "갑": ["진"], "을": ["사"], "병": ["미"], "정": ["신"], "무": ["미"],
+                "기": ["신"], "경": ["술"], "신": ["해"], "임": ["축"], "계": ["인"],
+            },
+            "건록": {
+                "갑": ["인"], "을": ["묘"], "병": ["사"], "정": ["오"], "무": ["사"],
+                "기": ["오"], "경": ["신"], "신": ["유"], "임": ["해"], "계": ["자"],
+            },
+            "태극귀인": {
+                "갑": ["자", "오"], "을": ["자", "오"],
+                "병": ["묘", "유"], "정": ["묘", "유"],
+                "무": ["진", "술", "축", "미"], "기": ["진", "술", "축", "미"],
+                "경": ["인", "해"], "신": ["인", "해"],
+                "임": ["사", "신"], "계": ["사", "신"],
+            },
+            "복성귀인": {
+                "갑": ["인"], "을": ["축"], "병": ["자"], "정": ["해"], "무": ["신"],
+                "기": ["미"], "경": ["오"], "신": ["사"], "임": ["진"], "계": ["묘"],
+            },
+            "천복귀인": {
+                "갑": ["유"], "을": ["신"], "병": ["자"], "정": ["해"], "무": ["묘"],
+                "기": ["인"], "경": ["오"], "신": ["사"], "임": ["오"], "계": ["사"],
+            },
+            "천주귀인": {
+                "갑": ["사"], "을": ["오"], "병": ["사"], "정": ["오"], "무": ["신"],
+                "기": ["유"], "경": ["해"], "신": ["자"], "임": ["인"], "계": ["묘"],
+            },
+            "비인살": {
+                "갑": ["유"], "을": ["술"], "병": ["자"], "정": ["축"], "무": ["자"],
+                "기": ["축"], "경": ["묘"], "신": ["진"], "임": ["오"], "계": ["미"],
+            },
+        }
+        for name, table in stem_based.items():
+            add_branch_hits(name, table.get(day_stem, []))
+
+        group_based = {
+            ("인", "오", "술"): {
+                "겁살": "해", "재살": "자", "천살": "축", "지살": "인",
+                "년살": "묘", "도화살": "묘", "월살": "진", "망신살": "사",
+                "장성살": "오", "반안살": "미", "역마살": "신", "육해살": "유", "화개살": "술",
+            },
+            ("신", "자", "진"): {
+                "겁살": "사", "재살": "오", "천살": "미", "지살": "신",
+                "년살": "유", "도화살": "유", "월살": "술", "망신살": "해",
+                "장성살": "자", "반안살": "축", "역마살": "인", "육해살": "묘", "화개살": "진",
+            },
+            ("사", "유", "축"): {
+                "겁살": "인", "재살": "묘", "천살": "진", "지살": "사",
+                "년살": "오", "도화살": "오", "월살": "미", "망신살": "신",
+                "장성살": "유", "반안살": "술", "역마살": "해", "육해살": "자", "화개살": "축",
+            },
+            ("해", "묘", "미"): {
+                "겁살": "신", "재살": "유", "천살": "술", "지살": "해",
+                "년살": "자", "도화살": "자", "월살": "축", "망신살": "인",
+                "장성살": "묘", "반안살": "진", "역마살": "사", "육해살": "오", "화개살": "미",
+            },
+        }
+
+        def group_for(branch: str):
+            for group, table in group_based.items():
+                if branch in group:
+                    return table
+            return {}
+
+        for basis_name, basis_branch in [("년지", year_branch), ("일지", day_branch)]:
+            table = group_for(basis_branch)
+            for shinsal_name, target in table.items():
+                for label, branch in branches:
+                    if branch == target:
+                        add(shinsal_name, f"{label}{branch}({basis_name} 기준)")
+
+        special_day_pillars = {
+            "괴강살": ["경진", "경술", "임진", "임술"],
+            "백호살": ["갑진", "을미", "병술", "정축", "무진", "임술", "계축"],
+            "백호대살": ["갑진", "을미", "병술", "정축", "무진", "임술", "계축"],
+            "음양차착": ["병자", "정축", "무인", "신묘", "임진", "계사", "병오", "정미", "무신", "신유", "임술", "계해"],
+            "고란살": ["을사", "정사", "신해", "무신"],
+        }
+        for name, values in special_day_pillars.items():
+            if day_pillar in values:
+                add(name, f"일주{day_pillar}")
+
+        ganzhi_based = {
+            "관귀학관": {
+                "갑": ["기사"], "을": ["임오"], "병": ["병신"], "정": ["정유"], "무": ["병신"],
+                "기": ["정유"], "경": ["신해"], "신": ["갑자"], "임": ["갑인"], "계": ["을묘"],
+            }
+        }
+        for name, table in ganzhi_based.items():
+            add_ganzhi_hits(name, table.get(day_stem, []))
+
+        month_based_targets = {
+            "천덕귀인": {
+                "인": {"stems": ["정"], "branches": []},
+                "묘": {"stems": [], "branches": ["신"]},
+                "진": {"stems": ["임"], "branches": []},
+                "사": {"stems": ["신"], "branches": []},
+                "오": {"stems": [], "branches": ["해"]},
+                "미": {"stems": ["갑"], "branches": []},
+                "신": {"stems": ["계"], "branches": []},
+                "유": {"stems": [], "branches": ["인"]},
+                "술": {"stems": ["병"], "branches": []},
+                "해": {"stems": ["을"], "branches": []},
+                "자": {"stems": [], "branches": ["사"]},
+                "축": {"stems": ["경"], "branches": []},
+            },
+            "월덕귀인": {
+                "인": {"stems": ["병"], "branches": []}, "오": {"stems": ["병"], "branches": []}, "술": {"stems": ["병"], "branches": []},
+                "신": {"stems": ["임"], "branches": []}, "자": {"stems": ["임"], "branches": []}, "진": {"stems": ["임"], "branches": []},
+                "해": {"stems": ["갑"], "branches": []}, "묘": {"stems": ["갑"], "branches": []}, "미": {"stems": ["갑"], "branches": []},
+                "사": {"stems": ["경"], "branches": []}, "유": {"stems": ["경"], "branches": []}, "축": {"stems": ["경"], "branches": []},
+            },
+        }
+        for name, table in month_based_targets.items():
+            targets = table.get(month_branch, {"stems": [], "branches": []})
+            add_stem_hits(name, targets["stems"])
+            add_branch_hits(name, targets["branches"])
+
+        simple_branch_based = {
+            "현침살": ["갑", "신", "묘", "오"],
+            "천문성": ["술", "해"],
+            "고신살": ["인", "사", "신", "해"],
+            "과숙살": ["축", "진", "미", "술"],
+        }
+        for name, targets in simple_branch_based.items():
+            add_branch_hits(name, targets)
+
+        return result
+
+    def get_branch_relations(self) -> Dict[str, List[str]]:
+        """사주 네 지지의 합충형파해 관계를 반환한다."""
+        pillars = [
+            ("년지", self.pillars.get_year_pillar().branch),
+            ("월지", self.pillars.get_month_pillar().branch),
+            ("일지", self.pillars.get_day_pillar().branch),
+            ("시지", self.pillars.get_hour_pillar().branch),
+        ]
+        pairs = [
+            ("육합", {tuple(sorted(pair)): element for pair, element in {
+                ("자", "축"): "토", ("인", "해"): "목", ("묘", "술"): "화",
+                ("진", "유"): "금", ("사", "신"): "수", ("오", "미"): "토",
+            }.items()}),
+            ("충", {tuple(sorted(pair)): "" for pair in [
+                ("자", "오"), ("축", "미"), ("인", "신"), ("묘", "유"),
+                ("진", "술"), ("사", "해"),
+            ]}),
+            ("파", {tuple(sorted(pair)): "" for pair in [
+                ("자", "유"), ("축", "진"), ("인", "해"), ("묘", "오"),
+                ("사", "신"), ("미", "술"),
+            ]}),
+            ("해", {tuple(sorted(pair)): "" for pair in [
+                ("자", "미"), ("축", "오"), ("인", "사"), ("묘", "진"),
+                ("신", "해"), ("유", "술"),
+            ]}),
+            ("원진", {tuple(sorted(pair)): "" for pair in [
+                ("자", "미"), ("축", "오"), ("인", "유"), ("묘", "신"),
+                ("진", "해"), ("사", "술"),
+            ]}),
+        ]
+        result: Dict[str, List[str]] = {name: [] for name, _ in pairs}
+        result.update({"삼합": [], "방합": [], "형": []})
+
+        for i in range(len(pillars)):
+            for j in range(i + 1, len(pillars)):
+                label_a, branch_a = pillars[i]
+                label_b, branch_b = pillars[j]
+                key = tuple(sorted((branch_a, branch_b)))
+                for name, table in pairs:
+                    if key in table:
+                        suffix = f" {table[key]}" if table[key] else ""
+                        result[name].append(f"{label_a}-{label_b} {branch_a}{branch_b}{suffix}")
+
+        branches = {branch for _, branch in pillars}
+        for combo, element in self.SAMHAP_TABLE.items():
+            if set(combo).issubset(branches):
+                result["삼합"].append(f"{''.join(combo)} {element}")
+        banghap = {
+            ("인", "묘", "진"): "목",
+            ("사", "오", "미"): "화",
+            ("신", "유", "술"): "금",
+            ("해", "자", "축"): "수",
+        }
+        for combo, element in banghap.items():
+            if set(combo).issubset(branches):
+                result["방합"].append(f"{''.join(combo)} {element}")
+
+        hyeong = [
+            ("인", "사", "신"), ("축", "술", "미"),
+            ("자", "묘"), ("진", "진"), ("오", "오"), ("유", "유"), ("해", "해"),
+        ]
+        branch_counts = {branch: [label for label, b in pillars if b == branch] for branch in branches}
+        for combo in hyeong:
+            if len(combo) == 3 and set(combo).issubset(branches):
+                result["형"].append("".join(combo))
+            elif len(combo) == 2 and all(branch in branches for branch in combo):
+                result["형"].append("".join(combo))
+            elif len(combo) == 2 and combo[0] == combo[1] and len(branch_counts.get(combo[0], [])) >= 2:
+                result["형"].append("".join(combo))
+
         return result
 
     def get_use_god(self) -> Dict[str, str]:
@@ -930,28 +1223,21 @@ class FourPillarsAnalysis:
 
     def _calculate_fortune_star(self, day_stem, stem, branch):
         """12운성 계산 로직"""
-        # 12운성 순서: 장생, 목욕, 관대, 건록, 제왕, 쇠, 병, 사, 묘, 절, 태, 양
-        fortune_stars = ["장생", "목욕", "관대", "건록", "제왕", "쇠", "병", "사", "묘", "절", "태", "양"]
-        
-        # 일간의 오행에 따른 시작 위치
-        stem_to_start = {
-            "갑": 0, "을": 0,  # 목
-            "병": 2, "정": 2,  # 화
-            "무": 4, "기": 4,  # 토
-            "경": 6, "신": 6,  # 금
-            "임": 8, "계": 8   # 수
+        stem_hanja = {
+            "갑": "甲", "을": "乙", "병": "丙", "정": "丁", "무": "戊",
+            "기": "己", "경": "庚", "신": "辛", "임": "壬", "계": "癸",
         }
-        
-        # 지지의 순서
-        branch_order = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
-        
-        # 시작 위치 계산
-        start_idx = stem_to_start.get(day_stem, 0)
-        branch_idx = branch_order.index(branch)
-        
-        # 12운성 계산
-        fortune_idx = (start_idx + branch_idx) % 12
-        return fortune_stars[fortune_idx]
+        branch_hanja = {
+            "자": "子", "축": "丑", "인": "寅", "묘": "卯", "진": "辰", "사": "巳",
+            "오": "午", "미": "未", "신": "申", "유": "酉", "술": "戌", "해": "亥",
+        }
+        normalize = {
+            "長生": "장생", "沐浴": "목욕", "冠帶": "관대", "建祿": "건록",
+            "帝旺": "제왕", "衰": "쇠", "病": "병", "병": "병", "死": "사",
+            "墓": "묘", "絶": "절", "胎": "태", "養": "양",
+        }
+        value = self.TWELVE_STAGE[stem_hanja[day_stem]][branch_hanja[branch]]
+        return normalize.get(value, value)
 
     def _calculate_god(self, day_stem, stem, branch):
         """12신살 계산 로직"""
@@ -1176,6 +1462,11 @@ class FourPillarsAnalysis:
         Returns:
             List[str]: 절기 날짜 목록 (ISO 8601 형식)
         """
+        try:
+            return [term_date.isoformat() for _, term_date in get_year_solar_terms(year)]
+        except ValueError:
+            pass
+
         terms_data = {
             2020: [
                 "2020-02-04T17:03:00",  # 입춘

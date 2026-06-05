@@ -2,8 +2,7 @@
 사주팔자(四柱八字) 계산과 기본 분석 기능.
 
 이 모듈은 외부 패키지 없이 동작하도록 보수적인 표준 공식을 사용한다.
-절기 시각까지 반영하는 전문 만세력 엔진은 아니지만, 패키지의 핵심 API가
-설치 후 안정적으로 작동하도록 연/월/일/시주 계산을 제공한다.
+1900년부터 2050년까지의 음력/절기 DB를 기준으로 연/월/일/시주 계산을 제공한다.
 """
 from __future__ import annotations
 
@@ -12,8 +11,10 @@ from typing import Dict, List, Union
 
 try:
     from .heavenly_stems_earthly_branches import HeavenlyStemsEarthlyBranches
+    from .solar_terms import get_major_term_index, get_previous_major_term, get_solar_term_datetime
 except ImportError:  # 직접 파일 실행 호환
     from heavenly_stems_earthly_branches import HeavenlyStemsEarthlyBranches
+    from solar_terms import get_major_term_index, get_previous_major_term, get_solar_term_datetime
 
 
 REGION_TIME_OFFSET = {
@@ -29,9 +30,33 @@ REGION_TIME_OFFSET = {
     "포항": 22 * 60 + 24,
 }
 
+REGION_LONGITUDE = {
+    "서울": 126.9780,
+    "인천": 126.7052,
+    "수원": 127.0286,
+    "대전": 127.3845,
+    "대구": 128.6014,
+    "부산": 129.0756,
+    "광주": 126.8526,
+    "제주": 126.5312,
+    "울산": 129.3114,
+    "포항": 129.3650,
+}
 
-def get_local_true_time(dt: datetime, region: str = "서울") -> datetime:
+
+def get_local_true_time(
+    dt: datetime,
+    region: str = "서울",
+    longitude: float | None = None,
+    standard_meridian: float = 135.0,
+) -> datetime:
     """한국 표준시를 지역 진태양시 근사값으로 보정한다."""
+    if longitude is not None:
+        offset_minutes = (standard_meridian - longitude) * 4
+        return dt - timedelta(minutes=offset_minutes)
+    if region in REGION_LONGITUDE:
+        offset_minutes = (standard_meridian - REGION_LONGITUDE[region]) * 4
+        return dt - timedelta(minutes=offset_minutes)
     offset = REGION_TIME_OFFSET.get(region, REGION_TIME_OFFSET["서울"])
     return dt - timedelta(seconds=offset)
 
@@ -63,21 +88,33 @@ class FourPillars:
         "무": 0, "계": 0,  # 갑인월
     }
 
-    SOLAR_MONTH_STARTS = [
-        (2, 4), (3, 6), (4, 5), (5, 6), (6, 6), (7, 7),
-        (8, 8), (9, 8), (10, 8), (11, 7), (12, 7), (1, 6),
-    ]
-
-    def __init__(self, date: datetime, region: str | None = "서울", use_true_solar_time: bool = True):
+    def __init__(
+        self,
+        date: datetime,
+        region: str | None = "서울",
+        use_true_solar_time: bool = True,
+        longitude: float | None = None,
+        standard_meridian: float = 135.0,
+        day_change: str = "zi",
+        use_true_solar_for_terms: bool = False,
+    ):
         self.input_date = date
         self.region = region
-        self.date = get_local_true_time(date, region or "서울") if use_true_solar_time else date
-        calculation_date = self.date + timedelta(days=1) if self.date.hour >= 23 else self.date
+        self.day_change = day_change
+        if day_change not in {"zi", "midnight", "split_zi"}:
+            raise ValueError("day_change는 'zi', 'midnight', 'split_zi' 중 하나여야 합니다.")
 
-        self.year_pillar = self.calculate_year_pillar_by_standard(calculation_date)
-        self.month_pillar = self.calculate_month_pillar_by_standard(calculation_date)
-        self.day_pillar = self.calculate_day_pillar_by_standard(calculation_date)
-        self.hour_pillar = self.calculate_hour_pillar_by_standard(calculation_date)
+        self.date = (
+            get_local_true_time(date, region or "서울", longitude=longitude, standard_meridian=standard_meridian)
+            if use_true_solar_time else date
+        )
+        self.term_date = self.date if use_true_solar_for_terms else date
+        day_date = self._day_calculation_date(self.date)
+
+        self.year_pillar = self.calculate_year_pillar_by_standard(self.term_date)
+        self.month_pillar = self.calculate_month_pillar_by_standard(self.term_date)
+        self.day_pillar = self.calculate_day_pillar_by_standard(day_date)
+        self.hour_pillar = self.calculate_hour_pillar_by_standard(self.date, self.day_pillar.stem)
 
     def get_year_pillar(self) -> HeavenlyStemsEarthlyBranches:
         return self.year_pillar
@@ -99,7 +136,7 @@ class FourPillars:
 
     def calculate_year_pillar_by_standard(self, date: datetime) -> HeavenlyStemsEarthlyBranches:
         year = date.year
-        if date < datetime(year, 2, 4):
+        if date < get_solar_term_datetime(year, "입춘"):
             year -= 1
         diff = year - 1864  # 갑자년
         return HeavenlyStemsEarthlyBranches(
@@ -107,28 +144,14 @@ class FourPillars:
             self.EARTHLY_BRANCHES[diff % 12],
         )
 
+    def _day_calculation_date(self, date: datetime) -> datetime:
+        if self.day_change == "zi" and date.hour >= 23:
+            return date + timedelta(days=1)
+        return date
+
     def _solar_month_index(self, date: datetime) -> int:
-        """절입일 근사 기준으로 인월=0 ... 축월=11 인덱스를 반환한다."""
-        current = date.replace(hour=0, minute=0, second=0, microsecond=0)
-        starts = []
-        for index, (month, day) in enumerate(self.SOLAR_MONTH_STARTS):
-            year = date.year + (1 if month == 1 and date.month == 12 else 0)
-            if month == 1 and date.month != 12:
-                year = date.year
-            start = datetime(year, month, day)
-            starts.append((start, index))
-
-        previous_year_sohan = datetime(date.year - 1, 1, 6)
-        starts.append((previous_year_sohan, 11))
-        starts.sort(key=lambda item: item[0])
-
-        selected = 11
-        for start, index in starts:
-            if current >= start:
-                selected = index
-            else:
-                break
-        return selected
+        """정확 절입시각 기준으로 인월=0 ... 축월=11 인덱스를 반환한다."""
+        return get_major_term_index(date)
 
     def calculate_month_pillar_by_solar_term(self, date: datetime) -> HeavenlyStemsEarthlyBranches:
         return self.calculate_month_pillar_by_standard(date)
@@ -150,10 +173,12 @@ class FourPillars:
             self.EARTHLY_BRANCHES[(days + 6) % 12],
         )
 
-    def calculate_hour_pillar_by_standard(self, date: datetime) -> HeavenlyStemsEarthlyBranches:
+    def calculate_hour_pillar_by_standard(self, date: datetime, day_stem: str | None = None) -> HeavenlyStemsEarthlyBranches:
         hour = date.hour
         branch_index = 0 if hour == 23 else ((hour + 1) // 2) % 12
-        day_stem_index = self.HEAVENLY_STEMS.index(self.calculate_day_pillar_by_standard(date).stem)
+        if day_stem is None:
+            day_stem = self.calculate_day_pillar_by_standard(self._day_calculation_date(date)).stem
+        day_stem_index = self.HEAVENLY_STEMS.index(day_stem)
         stem_index = (day_stem_index * 2 + branch_index) % 10
         return HeavenlyStemsEarthlyBranches(
             self.HEAVENLY_STEMS[stem_index],
@@ -206,12 +231,10 @@ class FourPillars:
         }
 
     def get_month_solar_term(self) -> datetime:
-        month_index = self._solar_month_index(self.date)
-        month, day = self.SOLAR_MONTH_STARTS[month_index]
-        year = self.date.year
-        if month == 1 and self.date.month == 12:
-            year += 1
-        return datetime(year, month, day)
+        previous = get_previous_major_term(self.term_date)
+        if previous is None:
+            raise ValueError("해당 날짜의 절입시각을 찾을 수 없습니다.")
+        return previous[1]
 
     def _element_counts(self) -> Dict[str, int]:
         counts = {element: 0 for element in self.ELEMENTS}

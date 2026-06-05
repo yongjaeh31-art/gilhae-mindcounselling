@@ -10,7 +10,7 @@ from .solar_terms import SolarTerms
 from .twenty_eight_stars import TwentyEightStars
 from .yin_yang import YinYangFiveElements
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 __all__ = [
     "BaziCalculator",

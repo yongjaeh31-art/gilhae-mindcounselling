@@ -5,6 +5,70 @@ from typing import Dict, List, Tuple
 from datetime import datetime, timedelta
 import math
 
+try:
+    from .solar_terms_data import SOLAR_TERMS
+except ImportError:
+    from solar_terms_data import SOLAR_TERMS
+
+
+MAJOR_TERM_NAMES = [
+    "입춘", "경칩", "청명", "입하", "망종", "소서",
+    "입추", "백로", "한로", "입동", "대설", "소한",
+]
+
+
+def get_year_solar_terms(year: int) -> List[Tuple[str, datetime]]:
+    """해당 양력 연도의 24절기 절입시각을 반환한다."""
+    if year not in SOLAR_TERMS:
+        raise ValueError("절기 DB는 1900년부터 2050년까지 지원합니다.")
+    return [(row["name"], datetime.fromisoformat(row["datetime"])) for row in SOLAR_TERMS[year]]
+
+
+def get_solar_term_datetime(year: int, name: str) -> datetime:
+    """해당 연도와 절기명의 정확 절입시각을 반환한다."""
+    for term_name, term_date in get_year_solar_terms(year):
+        if term_name == name:
+            return term_date
+    raise ValueError(f"{year}년에 {name} 절기 데이터가 없습니다.")
+
+
+def iter_solar_terms_around(date: datetime) -> List[Tuple[str, datetime]]:
+    """날짜 주변 3개년 절기를 시간순으로 반환한다."""
+    terms: List[Tuple[str, datetime]] = []
+    for year in range(date.year - 1, date.year + 2):
+        if year in SOLAR_TERMS:
+            terms.extend(get_year_solar_terms(year))
+    terms.sort(key=lambda item: item[1])
+    return terms
+
+
+def get_previous_major_term(date: datetime) -> Tuple[str, datetime] | None:
+    """지정 시각 이전 또는 같은 12절 절입시각을 반환한다."""
+    previous = None
+    for name, term_date in iter_solar_terms_around(date):
+        if name in MAJOR_TERM_NAMES and term_date <= date:
+            previous = (name, term_date)
+        elif term_date > date and previous:
+            break
+    return previous
+
+
+def get_next_major_term(date: datetime) -> Tuple[str, datetime] | None:
+    """지정 시각 이후의 다음 12절 절입시각을 반환한다."""
+    for name, term_date in iter_solar_terms_around(date):
+        if name in MAJOR_TERM_NAMES and term_date > date:
+            return name, term_date
+    return None
+
+
+def get_major_term_index(date: datetime) -> int:
+    """인월=0 ... 축월=11 절기 월 인덱스를 반환한다."""
+    previous = get_previous_major_term(date)
+    if previous is None:
+        raise ValueError("해당 날짜의 이전 절입시각을 찾을 수 없습니다.")
+    return MAJOR_TERM_NAMES.index(previous[0])
+
+
 class SolarTerms:
     """24절기 클래스"""
     
@@ -60,56 +124,15 @@ class SolarTerms:
         Returns:
             str: 24절기
         """
-        # 1984년 절기 기준일
-        base_dates = [
-            ("소한", datetime(1984, 1, 6)),
-            ("대한", datetime(1984, 1, 21)),
-            ("입춘", datetime(1984, 2, 4)),
-            ("우수", datetime(1984, 2, 19)),
-            ("경칩", datetime(1984, 3, 5)),
-            ("춘분", datetime(1984, 3, 21)),
-            ("청명", datetime(1984, 4, 5)),
-            ("곡우", datetime(1984, 4, 20)),
-            ("입하", datetime(1984, 5, 6)),
-            ("소만", datetime(1984, 5, 21)),
-            ("망종", datetime(1984, 6, 6)),
-            ("하지", datetime(1984, 6, 21)),
-            ("소서", datetime(1984, 7, 7)),
-            ("대서", datetime(1984, 7, 23)),
-            ("입추", datetime(1984, 8, 8)),
-            ("처서", datetime(1984, 8, 23)),
-            ("백로", datetime(1984, 9, 8)),
-            ("추분", datetime(1984, 9, 23)),
-            ("한로", datetime(1984, 10, 8)),
-            ("상강", datetime(1984, 10, 24)),
-            ("입동", datetime(1984, 11, 8)),
-            ("소설", datetime(1984, 11, 22)),
-            ("대설", datetime(1984, 12, 7)),
-            ("동지", datetime(1984, 12, 22))
-        ]
-        
-        # 날짜 차이 계산
-        year_diff = self.date.year - 1984
-        
-        # 해당 연도의 절기일 계산
-        term_dates = [(term, base_date + timedelta(days=year_diff * 365.2422)) for term, base_date in base_dates]
-        
-        # 절기 찾기
-        for i in range(len(term_dates)):
-            current_term, current_date = term_dates[i]
-            next_term, next_date = term_dates[(i + 1) % len(term_dates)]
-            
-            # 현재 절기일과 다음 절기일 사이의 중간점 계산
-            if i == len(term_dates) - 1:
-                next_date = next_date + timedelta(days=365.2422)
-            mid_date = current_date + (next_date - current_date) / 2
-            
-            # 현재 날짜가 중간점보다 작으면 현재 절기
-            if self.date < mid_date:
-                return current_term
-        
-        # 마지막 절기 반환
-        return term_dates[-1][0]
+        previous = None
+        for term_name, term_date in iter_solar_terms_around(self.date):
+            if term_date <= self.date:
+                previous = term_name
+            else:
+                break
+        if previous is None:
+            raise ValueError("해당 날짜의 절기 데이터를 찾을 수 없습니다.")
+        return previous
         
     def get_element(self) -> str:
         """해당 날짜의 24절기 오행 반환
