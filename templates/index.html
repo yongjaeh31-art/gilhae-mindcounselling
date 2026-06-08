@@ -26,8 +26,30 @@
     <main>
         <section id="hero" class="hero-section">
             <div class="hero-copy">
-                <p class="eyebrow">사주와 관상을 인문학적으로 풀어내는 마음 상담소</p>
-                <h1>반복되는 고민에는 이유가 있습니다.</h1>
+                <p class="eyebrow">길해명리마음상담소 · 글 쓰는 역술가, 글 쓰는 관상가</p>
+                <h1>반복되는 고민에는<br>이유가 있습니다</h1>
+                <div class="hero-channels" aria-label="길해의 채널">
+                    <a href="https://www.youtube.com/@gilhae.destiny" target="_blank" rel="noopener" aria-label="길해명리마음상담소 유튜브">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+                            <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-2C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 2A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-2A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58zM9.75 15.5v-7l6 3.5z"/>
+                        </svg>
+                    </a>
+                    <a href="https://www.instagram.com/mind_counselling_gh/" target="_blank" rel="noopener" aria-label="길해명리마음상담소 인스타그램">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <rect x="3" y="3" width="18" height="18" rx="5"/>
+                            <circle cx="12" cy="12" r="4"/>
+                            <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+                        </svg>
+                    </a>
+                    <a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" aria-label="길해명리마음상담소 네이버 프리미엄콘텐츠">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/>
+                            <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+                            <path d="M8.5 12.5h2.2c.9 0 1.6.7 1.6 1.6s-.7 1.6-1.6 1.6H8.5z"/>
+                            <path d="M8.5 12.5v5"/>
+                        </svg>
+                    </a>
+                </div>
                 <p class="hero-lead">
                     일이 막히고, 돈이 모이지 않고, 관계가 어렵고, 결혼이 고민되고,
                     내 인생의 방향을 모르겠다면 사주는 당신을 단정하는 도구가 아니라
@@ -37,17 +59,59 @@
                     길해는 사주와 관상, 그리고 삶의 이야기를 통해 당신의 문제를 함께 읽고
                     해결의 방향을 찾아드립니다.
                 </p>
+                <nav class="hero-pill-nav" aria-label="바로가기">
+                    <a href="#concerns">고민 선택</a>
+                    <a href="#fortune">무료 사주 분석</a>
+                    <a href="/articles">길해의 글</a>
+                    <a href="#consulting">상담 이야기</a>
+                    <a href="#face-reading">한줄 관상학</a>
+                </nav>
                 <div class="hero-actions">
                     <a href="#concerns" class="btn-primary">내 고민 선택하기</a>
                     <a href="#fortune" class="btn-secondary">10초 무료 사주 분석</a>
-                    <a href="#articles" class="btn-tertiary">길해의 글 먼저 읽기</a>
+                    <a href="/articles" class="btn-tertiary">길해의 글 먼저 읽기</a>
                     <a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-ghost">네이버 예약 바로가기</a>
                 </div>
             </div>
             <aside class="hero-note">
                 <span>길해의 공간</span>
+                <img src="{{ url_for('static', filename='hero-space.jpg') }}" alt="햇살이 비치는 길해명리마음상담소의 차분한 상담 공간" loading="lazy">
                 <p>무섭게 겁주는 점집이 아니라, 내 문제를 말해도 안전한 작가의 상담실처럼 느껴지는 곳.</p>
             </aside>
+        </section>
+
+        <section id="contents" class="section toc-section">
+            <div class="section-head">
+                <p class="eyebrow">차례</p>
+                <h2>이 책 같은 홈페이지의 구성</h2>
+                <p>표지를 넘기듯, 아래 목차를 따라가면 지금 필요한 이야기를 찾을 수 있습니다.</p>
+            </div>
+            <ol class="toc-list">
+                <li>
+                    <span class="toc-num">1장</span>
+                    <span class="toc-body"><a href="#concerns">고민 선택</a><span>지금 가장 답답한 문제를 먼저 골라봅니다 — 일·돈·연애·가족·인생·관상</span></span>
+                </li>
+                <li>
+                    <span class="toc-num">2장</span>
+                    <span class="toc-body"><a href="#fortune">무료 사주 분석</a><span>10초 만에 내 사주의 큰 구조를 먼저 확인합니다</span></span>
+                </li>
+                <li>
+                    <span class="toc-num">3장</span>
+                    <span class="toc-body"><a href="/articles">길해의 글</a><span>밖으로 나가지 않고, 이 페이지에서 바로 읽는 위안의 글들</span></span>
+                </li>
+                <li>
+                    <span class="toc-num">4장</span>
+                    <span class="toc-body"><a href="#consulting">상담 이야기</a><span>사주표를 읽는 데서 끝나지 않는, 길해의 상담이 진행되는 방식</span></span>
+                </li>
+                <li>
+                    <span class="toc-num">5장</span>
+                    <span class="toc-body"><a href="#face-reading">한줄 관상학</a><span>얼굴과 표정에 남은 시간의 흔적을 읽는 인문학</span></span>
+                </li>
+                <li>
+                    <span class="toc-num">6장</span>
+                    <span class="toc-body"><a href="#place">예약·위치</a><span>찾아오시는 길과 상담 요금, 예약 안내</span></span>
+                </li>
+            </ol>
         </section>
 
         <section id="concerns" class="section concern-section">
@@ -77,7 +141,7 @@
                 <h3>돈·사업</h3>
                 <p>돈은 단순히 많이 버는 문제가 아닙니다. 어떤 사람은 벌어도 남지 않고, 어떤 사람은 기회가 와도 감당하지 못하고, 어떤 사람은 운이 들어왔을 때 준비가 되어 있지 않습니다.</p>
                 <p>재물운은 돈의 크기보다 내가 돈을 다루는 방식과 운의 타이밍을 함께 봐야 합니다.</p>
-                <div><a href="#fortune" class="btn-primary">내 재물 흐름 확인하기</a><a href="https://contents.premium.naver.com/gilhae/mindcounselling" class="btn-tertiary" target="_blank" rel="noopener">길해의 재물운 글 보기</a></div>
+                <div><a href="#fortune" class="btn-primary">내 재물 흐름 확인하기</a><a href="/articles/money-flow-not-amount" class="btn-tertiary">길해의 재물운 글 보기</a></div>
             </article>
             <article class="empathy-card" data-concern-panel="love">
                 <h3>연애·결혼</h3>
@@ -87,7 +151,7 @@
             <article class="empathy-card" data-concern-panel="family">
                 <h3>가족·자녀</h3>
                 <p>아이의 사주는 아이를 단정하기 위한 것이 아닙니다. 부모가 어떤 밭이 되어주어야 하는지, 가족 안에서 어떤 역할과 거리가 필요한지 이해하기 위한 지도입니다.</p>
-                <div><a href="#place" class="btn-primary">가족·자녀 상담 보기</a><a href="https://contents.premium.naver.com/gilhae/mindcounselling" class="btn-tertiary" target="_blank" rel="noopener">관련 글 읽기</a></div>
+                <div><a href="#place" class="btn-primary">가족·자녀 상담 보기</a><a href="/articles/family-children-not-judgement" class="btn-tertiary">관련 글 읽기</a></div>
             </article>
             <article class="empathy-card" data-concern-panel="life">
                 <h3>인생 방향</h3>
@@ -99,7 +163,7 @@
                 <h3>관상·사람 보는 눈</h3>
                 <p>관상은 사람을 단정하는 기술이 아닙니다. 얼굴과 표정, 말투와 분위기에는 그 사람이 살아온 시간과 마음의 방향이 남습니다.</p>
                 <p>관상은 나와 타인을 이해하고 관계를 더 지혜롭게 바라보게 하는 인문학입니다.</p>
-                <div><a href="#face-reading" class="btn-primary">관상 상담 문의하기</a><a href="https://contents.premium.naver.com/gilhae/mindcounselling" class="btn-tertiary" target="_blank" rel="noopener">관상 인문학 글 읽기</a></div>
+                <div><a href="#face-reading" class="btn-primary">관상 상담 문의하기</a><a href="/articles/face-reading-as-humanities" class="btn-tertiary">관상 인문학 글 읽기</a></div>
             </article>
         </section>
 
@@ -260,14 +324,15 @@
         </section>
 
         <section id="articles" class="section articles-section">
-            <div class="section-head"><p class="eyebrow">길해의 글 추천</p><h2>당신의 고민과 연결되는 길해의 글</h2></div>
+            <div class="section-head"><p class="eyebrow">길해의 글 추천</p><h2>당신의 고민과 연결되는 길해의 글</h2><p>밖으로 나가지 않고, 이 페이지에서 바로 읽으실 수 있습니다.</p></div>
             <div class="article-grid">
-                <article><h3>일·이직</h3><p>이직운, 대운, 직업운, 조직생활, 승진운</p><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">프리미엄 글 보기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
-                <article><h3>돈·사업</h3><p>재물운, 사업운, 돈이 모이지 않는 사주, 식상생재, 재성</p><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">프리미엄 글 보기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
-                <article><h3>연애·결혼</h3><p>결혼운, 궁합, 재회, 배우자운, 관계의 반복</p><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">프리미엄 글 보기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
-                <article><h3>가족·자녀</h3><p>자녀운, 부모 역할, 가족 궁합, 아이의 진로</p><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">프리미엄 글 보기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
-                <article><h3>관상</h3><p>얼굴은 마음의 흔적, 관상으로 보는 사람 이해, 처세와 관계</p><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">프리미엄 글 보기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
+                <article><span class="article-tag">일·이직</span><h3><a href="/articles/work-stuck-season">버텨야 할 때와 떠나야 할 때, 어떻게 구분할까요</a></h3><p>이직운, 대운, 직업운, 조직생활, 승진운</p><a href="/articles/work-stuck-season" class="btn-secondary">글 바로 읽기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
+                <article><span class="article-tag">돈·사업</span><h3><a href="/articles/money-flow-not-amount">돈은 크기보다 흐름의 문제입니다</a></h3><p>재물운, 사업운, 돈이 모이지 않는 사주, 식상생재, 재성</p><a href="/articles/money-flow-not-amount" class="btn-secondary">글 바로 읽기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
+                <article><span class="article-tag">연애·결혼</span><h3><a href="/articles/love-pattern-anxiety">사랑하는데 자꾸 불안하다면, 마음이 아니라 패턴을 보세요</a></h3><p>결혼운, 궁합, 재회, 배우자운, 관계의 반복</p><a href="/articles/love-pattern-anxiety" class="btn-secondary">글 바로 읽기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
+                <article><span class="article-tag">가족·자녀</span><h3><a href="/articles/family-children-not-judgement">아이의 사주는 아이를 단정하기 위한 것이 아닙니다</a></h3><p>자녀운, 부모 역할, 가족 궁합, 아이의 진로</p><a href="/articles/family-children-not-judgement" class="btn-secondary">글 바로 읽기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
+                <article><span class="article-tag">관상</span><h3><a href="/articles/face-reading-as-humanities">관상은 사람을 알아맞히는 기술이 아니라, 이해하는 시선입니다</a></h3><p>얼굴은 마음의 흔적, 관상으로 보는 사람 이해, 처세와 관계</p><a href="/articles/face-reading-as-humanities" class="btn-secondary">글 바로 읽기</a><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-tertiary">이 주제로 상담하기</a></article>
             </div>
+            <div class="center-actions"><a href="/articles" class="btn-primary">길해의 글 전체 목록 보기</a></div>
         </section>
 
         <section id="consulting" class="section consulting-section">
@@ -280,7 +345,7 @@
 
         <section id="face-reading" class="section split-section">
             <div><p class="eyebrow">관상 인문학</p><h2>관상은 사람을 단정하는 기술이 아니라, 사람을 이해하는 눈입니다</h2><p>길해의 관상은 무섭고 신비한 예언이 아닙니다. 얼굴, 표정, 말투, 분위기, 걸음걸이에는 그 사람이 살아온 시간과 마음의 방향이 남습니다.</p></div>
-            <div class="soft-panel"><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">관상 상담 문의하기</a><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">관상 인문학 글 읽기</a><a href="#classes" class="btn-tertiary">관상 강의 문의하기</a></div>
+            <div class="soft-panel"><a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">관상 상담 문의하기</a><a href="/articles/face-reading-as-humanities" class="btn-secondary">관상 인문학 글 읽기</a><a href="#classes" class="btn-tertiary">관상 강의 문의하기</a></div>
         </section>
 
         <section id="classes" class="section classes-section">
@@ -321,10 +386,10 @@
         </section>
 
         <section id="premium" class="section premium-section">
-            <p class="eyebrow">네이버 프리미엄콘텐츠</p>
+            <p class="eyebrow">길해의 글</p>
             <h2>상담이 아직 부담스럽다면, 길해의 글을 먼저 읽어보세요</h2>
-            <p>길해의 글은 사주명리와 관상을 어렵지 않게 풀어냅니다. 상담을 받기 전, 내 고민과 비슷한 글을 먼저 읽어보면 내 문제가 어디에서 반복되는지 조금 더 선명해집니다.</p>
-            <div class="center-actions"><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-primary">네이버 프리미엄콘텐츠 구독하기</a><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">대표 글 먼저 보기</a><a href="#place" class="btn-tertiary">구독자 상담 할인 보기</a></div>
+            <p>길해의 글은 사주명리와 관상을 어렵지 않게 풀어냅니다. 이제는 홈페이지 안에서 바로 읽으실 수 있습니다. 상담을 받기 전, 내 고민과 비슷한 글을 먼저 읽어보면 내 문제가 어디에서 반복되는지 조금 더 선명해집니다.</p>
+            <div class="center-actions"><a href="/articles" class="btn-primary">길해의 글 모두 읽어보기</a><a href="https://contents.premium.naver.com/gilhae/mindcounselling" target="_blank" rel="noopener" class="btn-secondary">네이버 프리미엄콘텐츠 구독하기</a><a href="#place" class="btn-tertiary">구독자 상담 할인 보기</a></div>
         </section>
 
         <section id="place" class="section place-section">

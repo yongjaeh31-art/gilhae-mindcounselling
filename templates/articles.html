@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>길해의 글 | 길해명리마음상담소</title>
+    <meta name="description" content="반복되는 고민에 작은 위안과 이해를 더하는 길해의 글을 홈페이지에서 바로 읽어보세요.">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='result_section.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='manse_table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='article.css') }}">
+    <script defer src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <a class="logo" href="/">길해명리마음상담소</a>
+        <button class="nav-toggle" type="button" aria-label="메뉴 열기">☰</button>
+        <div class="nav-links">
+            <a href="/#concerns">고민 선택</a>
+            <a href="/#fortune">무료 분석</a>
+            <a href="/articles">길해의 글</a>
+            <a href="/#consulting">상담</a>
+            <a href="/#place">예약·위치</a>
+        </div>
+    </nav>
+
+    <main>
+        <section class="section article-list-hero">
+            <p class="eyebrow">길해의 글</p>
+            <h1>지금 답답한 마음에, 작은 위안과 이해를 더합니다</h1>
+            <p class="hero-lead">
+                상담을 받기엔 아직 망설여진다면, 비슷한 고민을 먼저 글로 만나보세요.
+                길해가 사주와 관상, 그리고 상담에서 만난 이야기들을 직접 풀어 씁니다.
+            </p>
+            {% if not_found %}
+            <p class="article-not-found">요청하신 글을 찾을 수 없습니다. 아래 목록에서 다른 글을 살펴보세요.</p>
+            {% endif %}
+        </section>
+
+        <section class="section article-list-section">
+            <div class="article-grid">
+                {% for a in articles %}
+                <article class="article-card">
+                    <span class="article-tag">{{ a.category }}</span>
+                    <h3><a href="{{ url_for('article_detail', slug=a.slug) }}">{{ a.title }}</a></h3>
+                    <p>{{ a.summary }}</p>
+                    <div class="article-card-meta">
+                        <span>읽는 데 약 {{ a.read_minutes }}분</span>
+                        <a href="{{ url_for('article_detail', slug=a.slug) }}" class="btn-secondary">글 읽기</a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            <div class="center-actions">
+                <a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">네이버 예약으로 상담 신청하기</a>
+                <a href="/#fortune" class="btn-secondary">무료 사주 분석 해보기</a>
+                <a href="/" class="btn-tertiary">홈으로 돌아가기</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 길해명리마음상담소. 사주와 관상은 삶을 이해하기 위한 지도입니다.</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ article.title }} | 길해의 글</title>
+    <meta name="description" content="{{ article.summary }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='result_section.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='manse_table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='article.css') }}">
+    <script defer src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <a class="logo" href="/">길해명리마음상담소</a>
+        <button class="nav-toggle" type="button" aria-label="메뉴 열기">☰</button>
+        <div class="nav-links">
+            <a href="/#concerns">고민 선택</a>
+            <a href="/#fortune">무료 분석</a>
+            <a href="/articles">길해의 글</a>
+            <a href="/#consulting">상담</a>
+            <a href="/#place">예약·위치</a>
+        </div>
+    </nav>
+
+    <main>
+        <article class="section article-reader">
+            <p class="eyebrow"><a href="{{ url_for('articles_list') }}">← 길해의 글 목록으로</a></p>
+            <span class="article-tag">{{ article.category }}</span>
+            <h1>{{ article.title }}</h1>
+            <p class="article-summary">{{ article.summary }}</p>
+            <p class="article-meta">읽는 데 약 {{ article.read_minutes }}분</p>
+
+            <div class="article-body">
+                {% for paragraph in article.body %}
+                <p>{{ paragraph }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="soft-panel article-cta">
+                <p>이 글이 지금의 고민과 닿아 있다면, 그 흐름을 함께 짚어드릴 수 있습니다.</p>
+                <div class="center-actions">
+                    <a href="https://booking.naver.com/booking/6/bizes/652988" target="_blank" rel="noopener" class="btn-primary">이 주제로 상담 예약하기</a>
+                    <a href="/#fortune" class="btn-secondary">먼저 내 사주 무료로 보기</a>
+                    <a href="{{ url_for('articles_list') }}" class="btn-tertiary">다른 글도 읽어보기</a>
+                </div>
+            </div>
+        </article>
+
+        {% if others %}
+        <section class="section article-related">
+            <div class="section-head"><p class="eyebrow">함께 읽으면 좋은 글</p><h2>다른 고민과 연결되는 길해의 글</h2></div>
+            <div class="article-grid">
+                {% for a in others %}
+                <article class="article-card">
+                    <span class="article-tag">{{ a.category }}</span>
+                    <h3><a href="{{ url_for('article_detail', slug=a.slug) }}">{{ a.title }}</a></h3>
+                    <p>{{ a.summary }}</p>
+                    <div class="article-card-meta">
+                        <span>읽는 데 약 {{ a.read_minutes }}분</span>
+                        <a href="{{ url_for('article_detail', slug=a.slug) }}" class="btn-secondary">글 읽기</a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 길해명리마음상담소. 사주와 관상은 삶을 이해하기 위한 지도입니다.</p>
+    </footer>
+</body>
+</html>
